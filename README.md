@@ -1,7 +1,11 @@
 # phylogenomic_dataset_construction
 
+# This is a fork of [Phylogenomic dataset construction respository](https://bitbucket.org/yanglab/phylogenomic_dataset_construction/)
 
-#### This repository contains updated scripts for the [Phylogenomic dataset construction respository](https://bitbucket.org/yangya/phylogenomic_dataset_construction/src/master/) 
+The primary change is moving from Python2 to Python3. There are a slew of other changes and updates.
+
+
+#### This repository contains updated scripts for the [Phylogenomic dataset construction respository](https://bitbucket.org/yangya/phylogenomic_dataset_construction/src/master/)
 
 The updated scripts cover from the read processing to transcript processing steps. The orthology inference scripts remain the same with only slightly updates.
 
@@ -36,7 +40,7 @@ Citation: Yang, Y. and S.A. Smith. 2014. Orthology inference in non-model organi
 
 [Transrate](http://hibberdlab.com/transrate/) Version 1.0.3 (Problems have been reported with some libraries of Salmon 0.6.2, please check that Salmon works properly. If you have problems with Salmon 0.6.0 you can install Transrate from [here](https://github.com/dfmoralesb/transrate), this will work with Salmon 0.8.2, which needs to be in the path as salmon)
 
-[Corset](https://github.com/Oshlack/Corset) 
+[Corset](https://github.com/Oshlack/Corset)
 
 [Salmon](https://github.com/COMBINE-lab/salmon/releases) Version v.0.9.1 (This is used for Corset and have not been tested with newer versions). You need to name this version salmon-0.9.1.
 
@@ -67,7 +71,7 @@ Citation: Yang, Y. and S.A. Smith. 2014. Orthology inference in non-model organi
 #### **We recommend running [Croco](https://gitlab.mbb.univ-montp2.fr/mbb/CroCo) for each batch of sequence data to check for cross-contamination before running the pipeline.**
 
 
-### Step 1: Read processing 
+### Step 1: Read processing
 
 **Note that the pipeline is expecting that the reads are names as taxonID_1.fq.gz or taxonID_1.fq for single end reads and taxonID_1.fq.gz and taxonID_2.fq.gz or taxonID_1.fq and taxonID_2.fq for paired end reads. If redas are not name like that the pipeline won't work**
 
@@ -83,18 +87,18 @@ The read processing will do:
 The script **filter_fq.py** will run all this steps for a given mRNA library. For paired end reads:
 
 	python filter_fq.py taxonID_1.fq.gz taxonID_2.fq.gz Order_name genome_to_filter[cp, mt or both] num_cores output_dir
-	
+
 The first two arguments are the read files. The Order_name is the plant Order (eg. Caryophyllales) will be used for bowtie2 to create a database to filter the organelle reads and can be replaced with any plant Order (or any taxonomic rank following [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy)) where you study group belongs. For a list of available genomes with their correspondence taxonomy check for the [cp_lookout](https://bitbucket.org/yanglab/phylogenomic_dataset_construction/src/bf3cd62fdfa139f7c43cf53815f189e9be264306/databases/chloroplast_NCBI_reference_sequences_OCT_17_2018_lookout.txt?at=master&fileviewer=file-view-default) or [mt_lookout](https://bitbucket.org/yanglab/phylogenomic_dataset_construction/src/bf3cd62fdfa139f7c43cf53815f189e9be264306/databases/mitochondrion_NCBI_reference_sequences_OCT_17_2018_lookout.txt?at=master&fileviewer=file-view-default) tables in the databases folder. For the organelle genome you can especify **cpDNA**, **mtDNA** or **both**. **num_core** is the number of cpus or threads to used. **output_dir** is where all the output files will be saved (any existing directory can be used).
-	
+
 For single end reads:
-	
+
 	python filter_fq.py taxonID_1.fq.gz Order_name organelle_genome num_cores output_dir
-	
+
 
 To see the argument needed to run a scripts call the script without arguments like:
 
 	python filter_fq.py
-	
+
 	Usage:
 	For single end reads: python filter_fq.py fastq_se_reads Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean(optional)
 	For paired end reads: python filter_fq.py fastq_pe_reads1 fastq_pe_reads2 Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean(optional)
@@ -103,14 +107,14 @@ This apply for all scripts described here.
 
 This will produced the filtered filles called **taxonID_1.overep_filtered.fq.gz** and **taxonID_2.overep_filtered.fq.gz** and the files containing the organelle reads called **taxonID_1.org_reads.fq.gz** and **taxonID_1.org_reads.fq.gz**
 
-This script also produces several intermediate files that won't be used anymore and that are pretty large and need to be removed. For this run the same command used previously plus **clean** at the end. This option can be used from the beginning, but I like to make sure that the final output is correct before removing intermediate files. 
+This script also produces several intermediate files that won't be used anymore and that are pretty large and need to be removed. For this run the same command used previously plus **clean** at the end. This option can be used from the beginning, but I like to make sure that the final output is correct before removing intermediate files.
 
 	python filter_fq.py taxonID_1.fq.gz taxonID_2.fq.gz Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean
 
 
 ### Step 2: _de novo_ assembly with [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki)
-	
-Choose a taxonID for each data set. This taxonID will be used throughout the analysis. Use short taxonIDs with 4-6 letters and digits with no special characters. 
+
+Choose a taxonID for each data set. This taxonID will be used throughout the analysis. Use short taxonIDs with 4-6 letters and digits with no special characters.
 
 The assembly can take several hours (even days, depending of the size of the library) and uses a lot of resources, so make sure to have access to preferably a cluster or a computer with enough computation power. Remember that you need to use the filtered reads for the filtering step.
 
@@ -141,15 +145,15 @@ Now we're going to perform a _de novo_ assembly quality analysis with [Transrate
 The results will be found in folder **taxonID.Trinity_transrate_results**. Remember to use the filtered reads for for the assembly quality.
 
 
-#### Assembly filtering 
+#### Assembly filtering
 
-We're gonna use the Transrate results to filter "bad" or low supported transcripts, based on three out of four transrate score components. sCnuc ≤0.25; sCcov; ≤0.25; and sCord; ≤0.5. 
+We're gonna use the Transrate results to filter "bad" or low supported transcripts, based on three out of four transrate score components. sCnuc ≤0.25; sCcov; ≤0.25; and sCord; ≤0.5.
 
 For this we will use the **contigs.csv** file found in the transrate output folder from the previous step.
 
 	python filter_transcripts_transrate.py taxonID.Trinity.fasta taxonID.Trinity_transrate_results/taxonID.Trinity/contigs.csv .
 
-This will produced a file containing only the good transcripts and short names (so it doesn't produce a error with blastx in later steps) called taxonID.good_transcripts.short_name.fa 
+This will produced a file containing only the good transcripts and short names (so it doesn't produce a error with blastx in later steps) called taxonID.good_transcripts.short_name.fa
 
 
 #### Chimera removal
@@ -157,7 +161,7 @@ This will produced a file containing only the good transcripts and short names (
 Now we need to remove chimeric transcripts (using the method from Yang, Y. and S.A. Smith Optimizing de novo assembly of short-read RNA-seq data for phylogenomics. BMC Genomics 2013, 14:328 doi:10.1186/1471-2164-14-328). This a BLAST-based method that depending of the size of the trascriptome can take a up to a couple of hours.
 
 	python run_chimera_detection.py taxonID.good_transcripts.short_name.fa reference_proteome_fasta num_core output_dir
-	
+
 This will produced a file called **taxonID.filtered_transcripts.fa** and the taxonID.chimera_transcripts.fa
 
 
@@ -193,7 +197,7 @@ This can be created using the following commands.
 
 	cat Atha.fa Beta.fa > db
 	makeblastdb -in ./db -parse_seqids -dbtype prot -out db
-	
+
 Then we need to find candidate orfs, BLAST all candidate orfs against reference we created and output the final orfs preferentially retaining the orfs with blast hits. This will be done with the script transdecoder_wrapper.py
 
 	python transdecoder_wrapper.py taxonID.largest_cluster_transcripts.fa num_cores strand(stranded or non-stranded) output_dir
@@ -205,12 +209,12 @@ Notice that the format of the sequences if taxonID@seqID. The special character 
 
 ## Step 4: Clustering
 
-The input sequences for homology inference can be cds or peptides depending on how closely-related the focal taxa are. 
+The input sequences for homology inference can be cds or peptides depending on how closely-related the focal taxa are.
 
 Before homology search, it always worth spending some time to make sure that the sequence names are formated correctly and peptides and cds have matching sequence names. Check for duplicated names, special characters other than digits, letters and "_", all names follow the format taxonID@seqID, and file names are the taxonID. It's good to check especially when some of the data sets were obtained from elsewhere. Most peptides and CDS files from genome annotation contain long names, spaces and special characters and should be eliminated before clustering.
 
 	python check_names.py DIR file_ending
-	
+
 	**DIR** is the folder name where the output of Transdecoder is located and **file_ending** is the file extension (eg. fa)
 
 Reduce redundancy. For amino acids:
@@ -224,21 +228,21 @@ Or alternatively, for cds (use -r 0 since these should all be positive strand af
 All-by-all blast. Copy all the taxonID.fa.cdhit files (or .cdhitest files) into a new directory. Note that it is important to set the maximum number of hits very high (e.g. 1000) to allow the inclusion of all closely related ingroup and outgroup sequences. I usually use an evalue cutoff of 10 so that I don't need to re-run the all-by-all blast again.
 
 Since blastp takes much longer to complete than blastn, I prefer using seperate input fasta files for all-by-all blastp to keep track of progress. I also carry out the makeblastdb step locally before doing blast on a cluster. This is because makeblastdb will check formatting of sequences, duplicate sequence names and special characters in seqIDs etc. It is easier to fix these locally before moving to a cluster.
-	
+
 	python all-by-all_blastp.py <DIR> <file_ending> <num_cores>
 	cat *.rawblastp >all.rawblast
 
 Or alternatively, if CDS works better when the taxa diverged recently:
-	
+
 	cat *.cdhitest >all.fa
 	makeblastdb -in all.fa -parse_seqids -dbtype nucl -out all.fa
 	blastn -db all.fa -query all.fa -evalue 10 -num_threads <num_cores> -max_target_seqs 1000 -out all.rawblast -outfmt '6 qseqid qlen sseqid slen frames pident nident length mismatch gapopen qstart qend sstart send evalue bitscore'
 
 [Optional] Remove ends of sequences that are not covered by any blast hits from other taxa. Skip this if wish not to cut ends that are fast-evolving, or using sequences from genome annotation.
-	
+
 	python cut_seq_ends.py all.fa all.rawblast
 
-Filter raw blast output by hit fraction and prepare input file for mcl. The input can be rawblastp or rawblastn results. I usually use 0.3 or 0.4 for hit_fraction_cutoff when using sequences assembled from RNA-seq depending on how divergent the sequences are. A low hit-fraction cutoff will output clusters with more incomplete sequences and much larger and sparser alignments, whereas a high hit-fraction cutoff gives tighter clusters but ignores incomplete or divergent sequences. For genome data I use a hit_fraction cutoff of 0.5. You can also set IGNORE_INTRASPECIFIC_HITS to be True to avoid recent gene duplications or isoforms forming tight clusters and break off. 
+Filter raw blast output by hit fraction and prepare input file for mcl. The input can be rawblastp or rawblastn results. I usually use 0.3 or 0.4 for hit_fraction_cutoff when using sequences assembled from RNA-seq depending on how divergent the sequences are. A low hit-fraction cutoff will output clusters with more incomplete sequences and much larger and sparser alignments, whereas a high hit-fraction cutoff gives tighter clusters but ignores incomplete or divergent sequences. For genome data I use a hit_fraction cutoff of 0.5. You can also set IGNORE_INTRASPECIFIC_HITS to be True to avoid recent gene duplications or isoforms forming tight clusters and break off.
 
 	python blast_to_mcl.py all.rawblast <hit_fraction_cutoff>
 
@@ -250,7 +254,7 @@ The output file is used as input for mcl. Try a few different hit fraction cutof
 	mcl all.rawblast.hit-frac0.3.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 2 -o hit-frac0.3_I2_e5
 
 Write fasta files for each cluster from mcl output. Make a new directory to put the thousands of output fasta files.
-	
+
 	mkdir <outDIR>
 	python write_fasta_files_from_mcl.py <fasta files with or without ends cut> <mcl_outfile> <minimal_taxa> <outDIR>
 
@@ -263,7 +267,7 @@ Make sure that raxml, fasttree, phyx(pxclsq,pxcat,pxs2phy,pxs2nex), TreeShrink, 
 
 Align each cluster, trim alignment, and infer a tree. Make sure that you have raxml 8 or later installed so that it reads fasta file. With an ealier version of raxml you will get an error message "Problem reading number of species and sites".
 
-For clusters that have less than 1000 sequences, it will be aligned with mafft (--genafpair --maxiterate 1000), trimmed by a minimal column occupancy of 0.1 and tree inference using raxml. For larger clusters it will be aligned with pasta, trimmed by a minimal column occupancy of 0.01 and tree inference using fasttree. The ouput tree files look like clusterID.raxml.tre or clusterID.fasttree.tre for clusters with 1000 or more sequences. 
+For clusters that have less than 1000 sequences, it will be aligned with mafft (--genafpair --maxiterate 1000), trimmed by a minimal column occupancy of 0.1 and tree inference using raxml. For larger clusters it will be aligned with pasta, trimmed by a minimal column occupancy of 0.01 and tree inference using fasttree. The ouput tree files look like clusterID.raxml.tre or clusterID.fasttree.tre for clusters with 1000 or more sequences.
 
 	python fasta_to_tree_pxclsq.py <fasta dir> <number_cores> dna/aa bootstrap(y/n)
 
@@ -297,7 +301,7 @@ Write fasta files from trees. The imput tree file ending should be .subtree
 
 Repeat the alignment tree estimation, trimming, masking and cutting deep paralogs. Can use a set of more stringent cutoffs in the second round. After the final round, write fasta files from trees using tree files that ends with .subtree, and estimate the final homolog trees.
 
-Alternatively one can calculate the synonymous distance and use that to guide cutting. However, since we are only trying to get well-aligned clusters for tree inference, choice of length cutoffs here can be somewhat arbitary. 
+Alternatively one can calculate the synonymous distance and use that to guide cutting. However, since we are only trying to get well-aligned clusters for tree inference, choice of length cutoffs here can be somewhat arbitary.
 
 From here a number of further analyses can be done with the homologs, such as gene tree discordance and back translate peptide alignment to codons with pal2nal and investigate signature of natural selection.
 
@@ -305,7 +309,7 @@ From here a number of further analyses can be done with the homologs, such as ge
 ## Step 6: Paralogy pruning to infer orthologs. Use one of the following:
 
 1to1: only look at homologs that are strictly one-to-one. No cutting is carried out.
-	
+
 	python filter_1to1_orthologs.py <homologDIR> <tree_file_ending> <minimal_taxa> <outDIR>
 
 MI: prune by maximum inclusion. The long_tip_cutoff here is typically the same as the value used when trimming tips. Set OUTPUT_1to1_ORTHOLOGS to False if wish only to ouput orthologs that is not 1-to-1, for example, when 1-to-1 orthologs have already been analyzed in previous steps.
