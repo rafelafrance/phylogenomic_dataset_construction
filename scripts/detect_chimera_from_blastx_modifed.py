@@ -9,8 +9,8 @@ Step 2: check a block of HSPs from the a query-hit pair (hit_block) for self
 chimeras
 Step 3: check  a block of HSPs from the same query (query_block) for
 multi-gene chimeras
-		if no self chimera was detected. Out put two cut ranges with a and b
-		after the names
+    if no self chimera was detected. Out put two cut ranges with a and b
+    after the names
 
 output a ".cut" file for position to cut, and a ".info" file for validating
 cuts

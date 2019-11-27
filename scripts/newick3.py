@@ -159,8 +159,9 @@ def parse_from_file(filename):
         file = sys.stdin
     else:
         file = open(filename, 'r')
-    content = string.strip(file.read())
-    treedescs = string.split(content, ';')
+    content = file.read()
+    content = content.strip()
+    treedescs = content.spl(';')
     tree = parse(treedescs[0])
     file.close()
     return tree

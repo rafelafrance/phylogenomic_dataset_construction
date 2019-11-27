@@ -389,7 +389,7 @@ def main():
             RT(homoDIR=homodir,
                tree_file_eneding=".tre",
                outDIR=orthodir,
-               MIN_INGROUP_TAXA=get_min_taxa(ingroups, args.max_mis_taxa),
+               min_ingroup_taxa=get_min_taxa(ingroups, args.max_mis_taxa),
                taxon_code_file=args.inout)
             os.system("touch " + outdir + "ortho_tre_ok")
             with open(logfile, "a") as f:

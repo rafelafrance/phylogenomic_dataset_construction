@@ -73,7 +73,7 @@ def main(DIR, infile_ending, thread, seqtype):
         if i.endswith(infile_ending):
             filecount += 1
             mafft(DIR=DIR, fasta=i, thread=thread, seqtype=seqtype)
-    assert filecount > 0, "No file end with " + file_end + "found in " + DIR
+    assert filecount > 0, "No file end with " + infile_ending + "found in " + DIR
 
 
 if __name__ == "__main__":

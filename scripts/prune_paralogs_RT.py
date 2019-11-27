@@ -15,7 +15,7 @@ from . import phylo3
 from . import newick3
 
 def RT(homoDIR, tree_file_eneding, outDIR, min_ingroup_taxa,
-       taxon_code_file_file):
+       taxon_code_file):
     if homoDIR[-1] != "/":
         homoDIR += "/"
     if outDIR[-1] != "/":
@@ -24,7 +24,7 @@ def RT(homoDIR, tree_file_eneding, outDIR, min_ingroup_taxa,
 
     INGROUPS = []
     OUTGROUPS = []
-    with open(taxon_code_file_file, "r") as infile:
+    with open(taxon_code_file, "r") as infile:
         for line in infile:
             if len(line) < 3:
                 continue

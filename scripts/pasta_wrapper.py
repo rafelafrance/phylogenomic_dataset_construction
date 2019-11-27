@@ -69,4 +69,4 @@ if __name__ == "__main__":
         if i.endswith(infile_ending):
             filecount += 1
             pasta(DIR=DIR, fasta=i, thread=thread, seqtype=seqtype)
-    assert filecount > 0, "No file end with " + file_end + "found in " + DIR
+    assert filecount > 0, "No file end with " + infile_ending + "found in " + DIR
