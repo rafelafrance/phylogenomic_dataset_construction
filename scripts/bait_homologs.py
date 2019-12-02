@@ -11,10 +11,7 @@ swipe and/or blastp, taking the top 20 hits, and construct the homolog tree
 """
 
 import os
-import os.path
 import sys
-# import phylo3
-# import newick3
 from . import seq
 
 RUN_BLASTP = True  # run blastp search along side of swipe for comparison
@@ -61,7 +58,8 @@ def swipe(query_fasta, DIR, num_cores, max_num_hits=20, min_bitscore=20.0):
             """
             swipe output colums are:
             Query id, Subject id, % identity, alignment length, mismatches,
-            gap openings, q. start, q. end, s. start, s. end, e-value, bit score
+            gap openings, q. start, q. end, s. start, s. end, e-value,
+            bit score
             """
             # summarize the hit seq ids
             if not os.path.exists(swipe_outname + ".hits"):
@@ -105,7 +103,8 @@ def swipe(query_fasta, DIR, num_cores, max_num_hits=20, min_bitscore=20.0):
             seqDICT = {}  # key is seq name, value is seq
             for s in seq.read_fasta_file(DIR + i):
                 seqDICT[s.name] = s.seq
-            with open(DIR + i + "." + get_filename_from_path(query_fasta).split(".")[0] + ".swipe.hits", "r") as infile:
+            with open(DIR + i + "." + get_filename_from_path(
+                    query_fasta).split(".")[0] + ".swipe.hits", "r") as infile:
                 for line in infile:
                     line = line.strip()
                     if len(line) > 0 and line not in query_seqids:
@@ -143,7 +142,9 @@ def blastp(query_fasta, DIR, num_cores, max_num_hits=20, min_bitscore=20.0):
                 cmd += " -out " + blastp_outname
                 cmd += " -evalue 10"
                 cmd += " -max_target_seqs " + str(max_num_hits)
-                cmd += " -outfmt '6 qseqid qlen sseqid slen frames pident nident length mismatch gapopen qstart qend sstart send evalue bitscore'"
+                cmd += " -outfmt '6 qseqid qlen sseqid slen frames pident "
+                cmd += "nident length mismatch gapopen qstart qend sstart "
+                cmd += "send evalue bitscore'"
                 print(cmd)
                 os.system(cmd)
             assert os.path.exists(blastp_outname), \
@@ -166,7 +167,8 @@ def blastp(query_fasta, DIR, num_cores, max_num_hits=20, min_bitscore=20.0):
                             hit_tuples.append((hit, bitscore))
 
                 out = []  # unique hit ids
-                for hit, bitscore in sorted(hit_tuples, key=lambda x: x[1], reverse=True):
+                for hit, bitscore in sorted(
+                        hit_tuples, key=lambda x: x[1], reverse=True):
                     if hit not in out:
                         out.append(hit)
                     if len(out) == max_num_hits:
@@ -203,7 +205,8 @@ def blastp(query_fasta, DIR, num_cores, max_num_hits=20, min_bitscore=20.0):
 
 if __name__ == "__main__":
     if len(sys.argv) != 5:
-        print("python bait_homologs.py query_pep_fa databaseDIR num_to_bait num_cores")
+        print("python bait_homologs.py query_pep_fa databaseDIR "
+              "num_to_bait num_cores")
         sys.exit(0)
 
     query_fasta, DIR, num_to_bait, num_cores = sys.argv[1:]

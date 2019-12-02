@@ -2,8 +2,7 @@
 
 ## This is a fork of [Phylogenomic dataset construction respository](https://bitbucket.org/yanglab/phylogenomic_dataset_construction/)
 
-The primary change is moving from Python2 to Python3. There are a slew of other changes and updates.
-
+This fork is intended to be used with [aTRAM](https://github.com/juliema/aTRAM). This implies that we do not need all of the scripts from the original repository because aTRAM has overlapping functionality. Aside from that, the other primary change is moving from Python2 to Python3. There are other changes and updates to the modules.
 
 ## Original README
 
@@ -88,22 +87,22 @@ The read processing will do:
 
 The script **filter_fq.py** will run all this steps for a given mRNA library. For paired end reads:
 
-	python filter_fq.py taxonID_1.fq.gz taxonID_2.fq.gz Order_name genome_to_filter[cp, mt or both] num_cores output_dir
+    python filter_fq.py taxonID_1.fq.gz taxonID_2.fq.gz Order_name genome_to_filter[cp, mt or both] num_cores output_dir
 
 The first two arguments are the read files. The Order_name is the plant Order (eg. Caryophyllales) will be used for bowtie2 to create a database to filter the organelle reads and can be replaced with any plant Order (or any taxonomic rank following [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy)) where you study group belongs. For a list of available genomes with their correspondence taxonomy check for the [cp_lookout](https://bitbucket.org/yanglab/phylogenomic_dataset_construction/src/bf3cd62fdfa139f7c43cf53815f189e9be264306/databases/chloroplast_NCBI_reference_sequences_OCT_17_2018_lookout.txt?at=master&fileviewer=file-view-default) or [mt_lookout](https://bitbucket.org/yanglab/phylogenomic_dataset_construction/src/bf3cd62fdfa139f7c43cf53815f189e9be264306/databases/mitochondrion_NCBI_reference_sequences_OCT_17_2018_lookout.txt?at=master&fileviewer=file-view-default) tables in the databases folder. For the organelle genome you can especify **cpDNA**, **mtDNA** or **both**. **num_core** is the number of cpus or threads to used. **output_dir** is where all the output files will be saved (any existing directory can be used).
 
 For single end reads:
 
-	python filter_fq.py taxonID_1.fq.gz Order_name organelle_genome num_cores output_dir
+    python filter_fq.py taxonID_1.fq.gz Order_name organelle_genome num_cores output_dir
 
 
 To see the argument needed to run a scripts call the script without arguments like:
 
-	python filter_fq.py
+    python filter_fq.py
 
-	Usage:
-	For single end reads: python filter_fq.py fastq_se_reads Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean(optional)
-	For paired end reads: python filter_fq.py fastq_pe_reads1 fastq_pe_reads2 Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean(optional)
+    Usage:
+    For single end reads: python filter_fq.py fastq_se_reads Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean(optional)
+    For paired end reads: python filter_fq.py fastq_pe_reads1 fastq_pe_reads2 Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean(optional)
 
 This apply for all scripts described here.
 
@@ -111,7 +110,7 @@ This will produced the filtered filles called **taxonID_1.overep_filtered.fq.gz*
 
 This script also produces several intermediate files that won't be used anymore and that are pretty large and need to be removed. For this run the same command used previously plus **clean** at the end. This option can be used from the beginning, but I like to make sure that the final output is correct before removing intermediate files.
 
-	python filter_fq.py taxonID_1.fq.gz taxonID_2.fq.gz Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean
+    python filter_fq.py taxonID_1.fq.gz taxonID_2.fq.gz Order_name genome_to_filter[cp, mt or both] num_cores output_dir clean
 
 
 ### Step 2: _de novo_ assembly with [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki)
@@ -122,13 +121,13 @@ The assembly can take several hours (even days, depending of the size of the lib
 
 For paired end read:
 
-	python trinity_wrapper.py taxonID_1.overep_filtered.fq.gz taxonID_2.overep_filtered.fq.gz taxonID num_cores max_memory_GB strand(stranded or non-stranded) output_dir
+    python trinity_wrapper.py taxonID_1.overep_filtered.fq.gz taxonID_2.overep_filtered.fq.gz taxonID num_cores max_memory_GB strand(stranded or non-stranded) output_dir
 
 The first two arguments are the filtered reads. **num_cores** is the number of threads. max_memory_GB is maximun amount of memory RAM (in GB) to used. **strand** specifies if the library is stranded or not (stranded or non-stranded). **output_dir** is the output directory.
 
 For single end reads:
 
-	python trinity_wrapper.py taxonID_1.overep_filtered.fq.gz taxonID num_cores max_memory_GB strand(stranded or non-stranded) output_dir
+    python trinity_wrapper.py taxonID_1.overep_filtered.fq.gz taxonID num_cores max_memory_GB strand(stranded or non-stranded) output_dir
 
 The output contining the assembled transcriptome will be called **taxonID.Trinity.fasta**
 
@@ -142,7 +141,7 @@ Note: The assembly quality and filtering steps using Transrate is only available
 
 Now we're going to perform a _de novo_ assembly quality analysis with [Transrate](http://hibberdlab.com/transrate/)
 
-	python transrate_wrapper.py taxonID.Trinity.fasta taxonID_1.overep_filtered.fq.gz taxonID_2.overep_filtered.fq.gz num_cores output_dir
+    python transrate_wrapper.py taxonID.Trinity.fasta taxonID_1.overep_filtered.fq.gz taxonID_2.overep_filtered.fq.gz num_cores output_dir
 
 The results will be found in folder **taxonID.Trinity_transrate_results**. Remember to use the filtered reads for for the assembly quality.
 
@@ -153,7 +152,7 @@ We're gonna use the Transrate results to filter "bad" or low supported transcrip
 
 For this we will use the **contigs.csv** file found in the transrate output folder from the previous step.
 
-	python filter_transcripts_transrate.py taxonID.Trinity.fasta taxonID.Trinity_transrate_results/taxonID.Trinity/contigs.csv .
+    python filter_transcripts_transrate.py taxonID.Trinity.fasta taxonID.Trinity_transrate_results/taxonID.Trinity/contigs.csv .
 
 This will produced a file containing only the good transcripts and short names (so it doesn't produce a error with blastx in later steps) called taxonID.good_transcripts.short_name.fa
 
@@ -162,7 +161,7 @@ This will produced a file containing only the good transcripts and short names (
 
 Now we need to remove chimeric transcripts (using the method from Yang, Y. and S.A. Smith Optimizing de novo assembly of short-read RNA-seq data for phylogenomics. BMC Genomics 2013, 14:328 doi:10.1186/1471-2164-14-328). This a BLAST-based method that depending of the size of the trascriptome can take a up to a couple of hours.
 
-	python run_chimera_detection.py taxonID.good_transcripts.short_name.fa reference_proteome_fasta num_core output_dir
+    python run_chimera_detection.py taxonID.good_transcripts.short_name.fa reference_proteome_fasta num_core output_dir
 
 This will produced a file called **taxonID.filtered_transcripts.fa** and the taxonID.chimera_transcripts.fa
 
@@ -175,17 +174,17 @@ Corset clusters transcripts from the same putative gene based in read share and 
 
 For paired end reads:
 
-	python corset_wrapper.py taxonID.filtered_transcripts.fa taxonID_1.overep_filtered.fq.gz taxonID_2.overep_filtered.fq.gz num_cores ouput_directory aligner[salmon or bowtie]
+    python corset_wrapper.py taxonID.filtered_transcripts.fa taxonID_1.overep_filtered.fq.gz taxonID_2.overep_filtered.fq.gz num_cores ouput_directory aligner[salmon or bowtie]
 
 Remember to used the filtered reads for this step. For the aligner option **we recommend to use Salmon**. Corset seems to have problems parsing the output of version of that we tested bowtie.
 
 For single end reads:
 
-	python corset_wrapper.py taxonID.filtered_transcripts.fa taxonID_1.overep_filtered.fq.gz num_cores ouput_directory aligner[salmon or bowtie]
+    python corset_wrapper.py taxonID.filtered_transcripts.fa taxonID_1.overep_filtered.fq.gz num_cores ouput_directory aligner[salmon or bowtie]
 
 This will produced the file **taxonID_salmon-clusters.txt** that is gonna be used to select the representative trascript
 
-	python filter_corset_output.py taxonID.filtered_transcripts.fa taxonID_salmon-clusters.txt output_dir
+    python filter_corset_output.py taxonID.filtered_transcripts.fa taxonID_salmon-clusters.txt output_dir
 
 This will produced the file **taxonID.largest_cluster_transcripts.fa**. This is the final filtered transcript file that will be used for translation.
 
@@ -197,12 +196,12 @@ First we need to create a custom blast database using closely-related, for examp
 
 This can be created using the following commands.
 
-	cat Atha.fa Beta.fa > db
-	makeblastdb -in ./db -parse_seqids -dbtype prot -out db
+    cat Atha.fa Beta.fa > db
+    makeblastdb -in ./db -parse_seqids -dbtype prot -out db
 
 Then we need to find candidate orfs, BLAST all candidate orfs against reference we created and output the final orfs preferentially retaining the orfs with blast hits. This will be done with the script transdecoder_wrapper.py
 
-	python transdecoder_wrapper.py taxonID.largest_cluster_transcripts.fa num_cores strand(stranded or non-stranded) output_dir
+    python transdecoder_wrapper.py taxonID.largest_cluster_transcripts.fa num_cores strand(stranded or non-stranded) output_dir
 
 This will produced the CDS and PEP files **taxonID.cds.fa** and **taxonID.pep.fa**. This are the files that have to be used for homology search.
 
@@ -215,50 +214,50 @@ The input sequences for homology inference can be cds or peptides depending on h
 
 Before homology search, it always worth spending some time to make sure that the sequence names are formated correctly and peptides and cds have matching sequence names. Check for duplicated names, special characters other than digits, letters and "_", all names follow the format taxonID@seqID, and file names are the taxonID. It's good to check especially when some of the data sets were obtained from elsewhere. Most peptides and CDS files from genome annotation contain long names, spaces and special characters and should be eliminated before clustering.
 
-	python check_names.py DIR file_ending
+    python check_names.py DIR file_ending
 
-	**DIR** is the folder name where the output of Transdecoder is located and **file_ending** is the file extension (eg. fa)
+    **DIR** is the folder name where the output of Transdecoder is located and **file_ending** is the file extension (eg. fa)
 
 Reduce redundancy. For amino acids:
 
-	cd-hit -i taxonID.fa -o taxonID.fa.cdhit -c 0.995 -n 5 -T <num_cores>
+    cd-hit -i taxonID.fa -o taxonID.fa.cdhit -c 0.995 -n 5 -T <num_cores>
 
 Or alternatively, for cds (use -r 0 since these should all be positive strand after translation):
 
-	cd-hit-est -i taxonID.fa.cds -o code.fa.cds.cdhitest -c 0.99 -n 10 -r 0 -T <num_cores>
+    cd-hit-est -i taxonID.fa.cds -o code.fa.cds.cdhitest -c 0.99 -n 10 -r 0 -T <num_cores>
 
 All-by-all blast. Copy all the taxonID.fa.cdhit files (or .cdhitest files) into a new directory. Note that it is important to set the maximum number of hits very high (e.g. 1000) to allow the inclusion of all closely related ingroup and outgroup sequences. I usually use an evalue cutoff of 10 so that I don't need to re-run the all-by-all blast again.
 
 Since blastp takes much longer to complete than blastn, I prefer using seperate input fasta files for all-by-all blastp to keep track of progress. I also carry out the makeblastdb step locally before doing blast on a cluster. This is because makeblastdb will check formatting of sequences, duplicate sequence names and special characters in seqIDs etc. It is easier to fix these locally before moving to a cluster.
 
-	python all-by-all_blastp.py <DIR> <file_ending> <num_cores>
-	cat *.rawblastp >all.rawblast
+    python all-by-all_blastp.py <DIR> <file_ending> <num_cores>
+    cat *.rawblastp >all.rawblast
 
 Or alternatively, if CDS works better when the taxa diverged recently:
 
-	cat *.cdhitest >all.fa
-	makeblastdb -in all.fa -parse_seqids -dbtype nucl -out all.fa
-	blastn -db all.fa -query all.fa -evalue 10 -num_threads <num_cores> -max_target_seqs 1000 -out all.rawblast -outfmt '6 qseqid qlen sseqid slen frames pident nident length mismatch gapopen qstart qend sstart send evalue bitscore'
+    cat *.cdhitest >all.fa
+    makeblastdb -in all.fa -parse_seqids -dbtype nucl -out all.fa
+    blastn -db all.fa -query all.fa -evalue 10 -num_threads <num_cores> -max_target_seqs 1000 -out all.rawblast -outfmt '6 qseqid qlen sseqid slen frames pident nident length mismatch gapopen qstart qend sstart send evalue bitscore'
 
 [Optional] Remove ends of sequences that are not covered by any blast hits from other taxa. Skip this if wish not to cut ends that are fast-evolving, or using sequences from genome annotation.
 
-	python cut_seq_ends.py all.fa all.rawblast
+    python cut_seq_ends.py all.fa all.rawblast
 
 Filter raw blast output by hit fraction and prepare input file for mcl. The input can be rawblastp or rawblastn results. I usually use 0.3 or 0.4 for hit_fraction_cutoff when using sequences assembled from RNA-seq depending on how divergent the sequences are. A low hit-fraction cutoff will output clusters with more incomplete sequences and much larger and sparser alignments, whereas a high hit-fraction cutoff gives tighter clusters but ignores incomplete or divergent sequences. For genome data I use a hit_fraction cutoff of 0.5. You can also set IGNORE_INTRASPECIFIC_HITS to be True to avoid recent gene duplications or isoforms forming tight clusters and break off.
 
-	python blast_to_mcl.py all.rawblast <hit_fraction_cutoff>
+    python blast_to_mcl.py all.rawblast <hit_fraction_cutoff>
 
 The output file is used as input for mcl. Try a few different hit fraction cutoffs and inflation values. My experience is that MCL is robust to minusLogEvalue cutoffs and using a cutoff of 0 or 5 works ok in all the cases I tested. You loose entire clusters of short genes by using a high minusLogEvalue cutoff. Use the smallest inflation value and hit-fraction cutoff value combination that gives alignable clusters. "--te" specifies number of threads, "-I" specifies the inflation value, and -tf 'gq()' specifies minimal -log transformed evalue to consider, and "-abc" specifies the input file format. Here are some example mcl command lines:
 
-	mcl all.rawblast.hit-frac0.4.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 1.4 -o hit-frac0.4_I1.4_e5
-	mcl all.rawblast.hit-frac0.4.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 2 -o hit-frac0.4_I2_e5
-	mcl all.rawblast.hit-frac0.3.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 1.4 -o hit-frac0.3_I1.4_e5
-	mcl all.rawblast.hit-frac0.3.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 2 -o hit-frac0.3_I2_e5
+    mcl all.rawblast.hit-frac0.4.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 1.4 -o hit-frac0.4_I1.4_e5
+    mcl all.rawblast.hit-frac0.4.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 2 -o hit-frac0.4_I2_e5
+    mcl all.rawblast.hit-frac0.3.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 1.4 -o hit-frac0.3_I1.4_e5
+    mcl all.rawblast.hit-frac0.3.minusLogEvalue --abc -te 5 -tf 'gq(5)' -I 2 -o hit-frac0.3_I2_e5
 
 Write fasta files for each cluster from mcl output. Make a new directory to put the thousands of output fasta files.
 
-	mkdir <outDIR>
-	python write_fasta_files_from_mcl.py <fasta files with or without ends cut> <mcl_outfile> <minimal_taxa> <outDIR>
+    mkdir <outDIR>
+    python write_fasta_files_from_mcl.py <fasta files with or without ends cut> <mcl_outfile> <minimal_taxa> <outDIR>
 
 Now we have a new directory with fasta files that look like cluster1.fa, cluster2.fa and so on.
 
@@ -271,13 +270,13 @@ Align each cluster, trim alignment, and infer a tree. Make sure that you have ra
 
 For clusters that have less than 1000 sequences, it will be aligned with mafft (--genafpair --maxiterate 1000), trimmed by a minimal column occupancy of 0.1 and tree inference using raxml. For larger clusters it will be aligned with pasta, trimmed by a minimal column occupancy of 0.01 and tree inference using fasttree. The ouput tree files look like clusterID.raxml.tre or clusterID.fasttree.tre for clusters with 1000 or more sequences.
 
-	python fasta_to_tree_pxclsq.py <fasta dir> <number_cores> dna/aa bootstrap(y/n)
+    python fasta_to_tree_pxclsq.py <fasta dir> <number_cores> dna/aa bootstrap(y/n)
 
 You can visualize some of the trees and alignments. You can see that tips that are 0.4 or more are pretty much junk. There are also some tips that are much longer than near-by tips that are probably results of assembly artifacts.
 
 Trim these spurious tips with [TreeShrink](https://github.com/uym2/TreeShrink)
 
-	python tree_shrink_wrapper.py DIR tree_file_ending quantile
+    python tree_shrink_wrapper.py DIR tree_file_ending quantile
 
 It outputs the tips that were trimmed in the file .txt and the trimmed trees in the files .tt. You would need to test different quantiles to see which one fit better you data. The TreeShrink uses 0.05 as default but this might be too high for some dataset. This produces that when the outgroups have long branches these get cut, so make sure that you check for the output trees and txt files to see wich branches are getting cut and choose a quantile value for you data (although a single quantile value would not work for all trees)
 
@@ -287,19 +286,19 @@ python trim_tips.py input_tree_dir tree_file_ending relative_cutoff absolute_cut
 
 Mask both mono- and (optional) paraphyletic tips that belong to the same taxon. Keep the tip that has the most un-ambiguous charactors in the trimmed alignment. Keep input and output trees in the same directory.
 
-	python mask_tips_by_taxonID_transcripts.py <.tt dir> <aln-cln dir> mask_paraphyletic(y/n)
+    python mask_tips_by_taxonID_transcripts.py <.tt dir> <aln-cln dir> mask_paraphyletic(y/n)
 
 For phylogenomic data sets that are from annotated genomes, I would only mask monophyletic tips, and keep the sequence with the shortest terminal branch length. Keep input and output trees in the same directory.
 
-	python mask_tips_by_taxonID_genomes.py <.tt dir>
+    python mask_tips_by_taxonID_genomes.py <.tt dir>
 
 Cut deep paralogs. If interested in building phylogeny a lower (more stringent) long_internal_branch_cutoff should be used. Use a higher (more relaxed) cutoff if interested in homologs to avoid splitting homologs. This works very well with CDS and less effective amino acid squences. For CDS the branch lengths are mostly determined by synonymous distance and are more consistant than for amino acids. Make sure that the indir and outdir are different directories.
 
-	python cut_long_internal_branches.py <input tree dir> <input tree file ending> <internal_branch_length_cutoff> <minimal no. taxa> <outDIR>
+    python cut_long_internal_branches.py <input tree dir> <input tree file ending> <internal_branch_length_cutoff> <minimal no. taxa> <outDIR>
 
 Write fasta files from trees. The imput tree file ending should be .subtree
 
-	python write_fasta_files_from_trees.py all.fa <cut tree dir> <tree_file_ending> <outDIR>
+    python write_fasta_files_from_trees.py all.fa <cut tree dir> <tree_file_ending> <outDIR>
 
 Repeat the alignment tree estimation, trimming, masking and cutting deep paralogs. Can use a set of more stringent cutoffs in the second round. After the final round, write fasta files from trees using tree files that ends with .subtree, and estimate the final homolog trees.
 
@@ -312,55 +311,55 @@ From here a number of further analyses can be done with the homologs, such as ge
 
 1to1: only look at homologs that are strictly one-to-one. No cutting is carried out.
 
-	python filter_1to1_orthologs.py <homologDIR> <tree_file_ending> <minimal_taxa> <outDIR>
+    python filter_1to1_orthologs.py <homologDIR> <tree_file_ending> <minimal_taxa> <outDIR>
 
 MI: prune by maximum inclusion. The long_tip_cutoff here is typically the same as the value used when trimming tips. Set OUTPUT_1to1_ORTHOLOGS to False if wish only to ouput orthologs that is not 1-to-1, for example, when 1-to-1 orthologs have already been analyzed in previous steps.
 
-	python prune_paralogs_MI.py <homologDIR> <tree_file_ending> <relative_long_tip_cutoff>  <absolute_long_tip_cutoff> <minimal_taxa> <outDIR>
+    python prune_paralogs_MI.py <homologDIR> <tree_file_ending> <relative_long_tip_cutoff>  <absolute_long_tip_cutoff> <minimal_taxa> <outDIR>
 
 MO: prune by using homologs with monophyletic, non-repeating outgroups, reroot and cut paralog from root to tip. If no outgroup, only use those that do not have duplicated taxa. Change the list of ingroup and outgroup names first. Set OUTPUT_1to1_ORTHOLOGS to False if wish only to ouput orthologs that is not 1-to-1
 
-	python prune_paralogs_MO.py <homologDIR> <tree_file_ending> <minimal_taxa> <outDIR>
+    python prune_paralogs_MO.py <homologDIR> <tree_file_ending> <minimal_taxa> <outDIR>
 
 RT: prune by extracting ingroup clades and then cut paralogs from root to tip. If no outgroup, only use those that do not have duplicated taxa. Compile a list of ingroup and outgroup taxonID, with each line begin with either "IN" or "OUT", followed by a tab, and then the taxonID.
 
-	python prune_paralogs_RT.py <homologDIR> <tree_file_ending> <outDIR> <minimal_ingroup_taxa> <ingroup and outgroup taxonIDs>
+    python prune_paralogs_RT.py <homologDIR> <tree_file_ending> <outDIR> <minimal_ingroup_taxa> <ingroup and outgroup taxonIDs>
 
 Or alternatively, if the input homolog tree is already rooted:
 
-	python prune_paralogs_from_rooted_trees.py <homoTreeDIR> <tree_file_ending> <minimal_taxa> <outDIR>
+    python prune_paralogs_from_rooted_trees.py <homoTreeDIR> <tree_file_ending> <minimal_taxa> <outDIR>
 
 
 ## Step 7: Visualize matrix occupancy stats and constructing the supermatrix
 
-	python ortholog_occupancy_stats.py <ortho_treDIR>
+    python ortholog_occupancy_stats.py <ortho_treDIR>
 
 Read in and rank number of taxa per ortholog from highest to lowest. Plot the ranked number of taxa per ortholog
 
-	a <- as.numeric(read.table("ortho_stats")[,1])
-	a <- sort(a, decreasing=TRUE)
-	pdf(file="taxon_occupancy.pdf")
-	plot(a, type="l", lwd=3, ylab="Number of Taxa in Each Ortholog")
-	dev.off()
+    a <- as.numeric(read.table("ortho_stats")[,1])
+    a <- sort(a, decreasing=TRUE)
+    pdf(file="taxon_occupancy.pdf")
+    plot(a, type="l", lwd=3, ylab="Number of Taxa in Each Ortholog")
+    dev.off()
 
 Check taxon_stats to see if any taxa have unusally low number of genes in the orthologs. Open the file taxon_occupancy.pdf and decide the MIN_TAXA filter. Write new fasta files from ortholog trees
 
-	python write_ortholog_fasta_files.py <fasta file with all seqs> <ortholog tree DIR> outDIR MIN_TAXA
+    python write_ortholog_fasta_files.py <fasta file with all seqs> <ortholog tree DIR> outDIR MIN_TAXA
 
 Align final orthologs. Play with a few alignment methods here. Try prank or fsa in addition to mafft or sate for more accurate alignments. Prank tend to create lots of gaps when it is not sure about the homology so make sure to check the alignment visually.
 
-	python prank_wrapper.py <inDIR> <outDIR> <file ending> DNA/aa
+    python prank_wrapper.py <inDIR> <outDIR> <file ending> DNA/aa
 
 Trim alignment. I usually use 0.3 for MIN_COLUMN_OCCUPANCY
 
-	python pxclsq_wrapper.py <inDIR> <MIN_COLUMN_OCCUPANCY> DNA/aa
+    python pxclsq_wrapper.py <inDIR> <MIN_COLUMN_OCCUPANCY> DNA/aa
 
 Or use Gblocks for trimming alignments if the sequences are very divergent (change FILE_ENDING first):
 
-	python pep_gblocks_wrapper.py <inDIR> <outDIR>
+    python pep_gblocks_wrapper.py <inDIR> <outDIR>
 
 Choose the minimal cleaned alignment length and minimal number of taxa filters for whether to include an ortholog in the supermatrix. Concatenate selected cleaned matrices:
 
-	python concatenate_matrices_phyx.py <aln-clnDIR> <numofsites> <numoftaxa> <outfile>
+    python concatenate_matrices_phyx.py <aln-clnDIR> <numofsites> <numoftaxa> <outfile>
 
 This will output a list of cleaned orthology alignments that passed the filter, a summary of taxon matrix occupancies to check whether any taxon is under represented, and a concatenated matrix in phylip and nexus format

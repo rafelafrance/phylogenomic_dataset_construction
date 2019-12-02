@@ -5,3 +5,8 @@
 
 junk/
 venv/
+data/
+temp/
+output/
+
+.~*

@@ -1,8 +1,6 @@
 import sys
-from . import seq
-import matplotlib.pyplot as plt
+from scripts import seq
 import networkx as nx
-from networkx.drawing.nx_agraph import write_dot
 
 
 def check_overlap(seq1, seq2):
