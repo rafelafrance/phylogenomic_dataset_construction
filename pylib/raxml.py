@@ -20,7 +20,7 @@ def raxml(args, fasta_path, temp_dir):
         '-n {}'.format(tree)])
 
     with util.cd(temp_dir):
-        log.subcommand(cmd, '.')
+        log.subcommand(cmd)
 
         tree_src = join('RAxML_bestTree.' + tree)
         tree_dst = join(args.output_prefix, tree)
@@ -46,7 +46,7 @@ def raxml_bs(args, fasta_path, temp_dir, replicates=100):
         '-n {}'.format(tree)])
 
     with util.cd(temp_dir):
-        log.subcommand(cmd, '.')
+        log.subcommand(cmd)
 
         tree_src = join('RAxML_bipartitions.' + tree)
         tree_dst = join(args.output_prefix, tree)

@@ -1,5 +1,7 @@
 """Utilities for working with sequences."""
 
+import re
+from os.path import basename, join, splitext
 from functools import reduce
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
@@ -7,6 +9,7 @@ CODON_LEN = 3
 
 COMPLEMENT = str.maketrans('ACGTUWSMKRYBDHVNXacgtuwsmkrybdhvnx-',
                            'TGCAAWSKMYRVHDBNXtgcaawskmyrvhdbnx-')
+AA_REPLACE = str.maketrans('Uu', 'Xx')
 
 SEQ_LEN_CUTOFF = 10_000
 SEQ_COUNT_CUTOFF = 1_000
@@ -44,6 +47,24 @@ def longest_fasta_seq(fasta):
     with open(fasta) as fasta_file:
         return reduce(
             max, [len(s[1]) for s in SimpleFastaParser(fasta_file)], 0)
+
+
+def adjust_aa_seq(seq):
+    """Replace "U"s with "X"s and remove everything after a stop codon."""
+    seq = seq.translate(AA_REPLACE)
+    return re.sub(r'\*.*', '', seq)
+
+
+def adjust_aa_seqs(fasta_path, temp_dir):
+    """Fix up amino acid sequences."""
+    out_path = join(temp_dir, splitext(basename(fasta_path))[0]) + '_aa.fasta'
+
+    with open(fasta_path) as in_file, open(out_path, 'w') as out_file:
+        for header, seq in SimpleFastaParser(in_file):
+            seq = adjust_aa_seq(seq)
+            write_fasta_record(out_file, header, seq)
+
+    return out_path
 
 
 def write_fasta_record(out_file, header, seq):

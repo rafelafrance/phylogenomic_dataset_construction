@@ -12,7 +12,10 @@ import pylib.util as util
 import pylib.bio as bio
 import pylib.log as log
 from pylib.mafft import mafft
-import pylib.raxml as raxml
+from pylib.raxml import raxml, raxml_bs
+from pylib.pxclsq import pxclsq, COLUMN_OCCUPANCY_LG, COLUMN_OCCUPANCY_SM
+from pylib.pasta import pasta
+from pylib.fasttree import fasttree
 
 
 def build_trees(args):
@@ -39,28 +42,23 @@ def fasta_to_tree(args, fasta_paths, temp_dir):
             continue
 
         if args.bootstrap:
-            # alignment = mafft(path, fasta, num_cores, seq_type)
-            # cleaned = pxclsq(path, alignment, COLUMN_OCCUPANCY_LG, seq_type)
-            # raxml_bs(path, cleaned, num_cores, seq_type)
-            raxml.raxml_bs(args, fasta, temp_dir)
+            alignment = mafft(args, fasta, temp_dir)
+            cleaned = pxclsq(args, alignment, temp_dir, COLUMN_OCCUPANCY_LG)
+            tree = raxml_bs(args, cleaned, temp_dir)
         elif seq_count >= bio.SEQ_COUNT_CUTOFF:
-            pass
-            # alignment = pasta(path, fasta, num_cores, seq_type)
-            # cleaned = pxclsq(path, alignment, COLUMN_OCCUPANCY_SM seq_type)
-            # fasttree(path, cleaned, seq_type)
+            alignment = pasta(args, fasta, temp_dir)
+            cleaned = pxclsq(args, alignment, temp_dir, COLUMN_OCCUPANCY_SM)
+            tree = fasttree(args, cleaned, temp_dir)
         else:
             alignment = mafft(args, fasta, temp_dir)
-            # cleaned = pxclsq(path, alignment, COLUMN_OCCUPANCY_SM seq_type)
-            # raxml(path, cleaned, num_cores, seq_type)
-            raxml.raxml(args, fasta, temp_dir)
+            cleaned = pxclsq(args, alignment, temp_dir, COLUMN_OCCUPANCY_SM)
+            tree = raxml(args, cleaned, temp_dir)
 
 
 def get_fasta_paths(args):
     """Get the fasta files to process."""
     pattern = join(args.assemblies_dir, args.file_filter)
     fasta_paths = sorted([abspath(p) for p in glob(pattern)])
-    for path in fasta_paths:
-        print(path)
     if len(fasta_paths) == 0:
         log.fatal('No files were found with this mask: "{}".'.format(pattern))
     return fasta_paths
