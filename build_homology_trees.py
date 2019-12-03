@@ -3,15 +3,15 @@
 """Build homology trees."""
 
 import os
-from os.path import basename, join, splitext
+from os.path import abspath, basename, expanduser, join, splitext
 from glob import glob
 from datetime import date
 import argparse
 import textwrap
-from Bio.SeqIO.FastaIO import SimpleFastaParser
 import pylib.util as util
 import pylib.bio as bio
 import pylib.log as log
+from pylib.mafft import mafft
 import pylib.raxml as raxml
 
 
@@ -30,36 +30,52 @@ def build_trees(args):
 
 def fasta_to_tree(args, fasta_paths, temp_dir):
     """Build trees from the fasta files."""
-    for path in fasta_paths:
+    for fasta in fasta_paths:
+        seq_count = bio.fasta_record_count(fasta)
+
+        if seq_count < bio.MIN_SEQ:
+            log.warn('"{}" has fewer than {} records, skipping.'.format(
+                fasta, bio.MIN_SEQ))
+            continue
+
         if args.bootstrap:
-            raxml.raxml_bs(args, path, temp_dir)
+            # alignment = mafft(path, fasta, num_cores, seq_type)
+            # cleaned = pxclsq(path, alignment, COLUMN_OCCUPANCY_LG, seq_type)
+            # raxml_bs(path, cleaned, num_cores, seq_type)
+            raxml.raxml_bs(args, fasta, temp_dir)
+        elif seq_count >= bio.SEQ_COUNT_CUTOFF:
+            pass
+            # alignment = pasta(path, fasta, num_cores, seq_type)
+            # cleaned = pxclsq(path, alignment, COLUMN_OCCUPANCY_SM seq_type)
+            # fasttree(path, cleaned, seq_type)
         else:
-            raxml.raxml(args, path, temp_dir)
+            alignment = mafft(args, fasta, temp_dir)
+            # cleaned = pxclsq(path, alignment, COLUMN_OCCUPANCY_SM seq_type)
+            # raxml(path, cleaned, num_cores, seq_type)
+            raxml.raxml(args, fasta, temp_dir)
 
 
 def get_fasta_paths(args):
     """Get the fasta files to process."""
     pattern = join(args.assemblies_dir, args.file_filter)
-    fasta_paths = sorted(glob(pattern))
-    if not len(fasta_paths):
+    fasta_paths = sorted([abspath(p) for p in glob(pattern)])
+    for path in fasta_paths:
+        print(path)
+    if len(fasta_paths) == 0:
         log.fatal('No files were found with this mask: "{}".'.format(pattern))
     return fasta_paths
 
 
 def long_seq_check(fasta_paths, seq_type):
     """Warn about really long sequences."""
-    for path in fasta_paths:
-        longest, i = 0, 0
-
-        with open(path) as fasta_file:
-            for i, (_, seq) in enumerate(SimpleFastaParser(fasta_file), 1):
-                longest = max(longest, len(seq.replace('-', '')))
-
-        if bio.too_long(seq_type, longest):
-            log.warn(util.shorten("""{} has {} sequences. 
+    for fasta_path in fasta_paths:
+        longest = bio.longest_fasta_seq(fasta_path)
+        if bio.too_long(longest, seq_type):
+            seq_count = bio.fasta_record_count(fasta_path)
+            log.warn(util.shorten("""{} has {} sequences.
                 The longest is {} characters.
                 This is too long and may crash the alignment process.
-                """.format(path, i, longest)))
+                """.format(fasta_path, seq_count, longest)))
 
 
 def parse_args():
@@ -91,7 +107,7 @@ def parse_args():
     parser.add_argument(
         '-c', '--cpus', '--processes', type=int, default=cpus,
         help="""Number of CPU processors to use. This is passed to wrapped
-            programs that use this option like: mafft. 
+            programs that use this option like: mafft.
             The default will use {} out of {} CPUs.
             """.format(cpus, os.cpu_count()))
 
@@ -102,18 +118,18 @@ def parse_args():
             default is "dna".""")
 
     parser.add_argument(
-        '-b', '--bootstrap',  action='store_true',
+        '-b', '--bootstrap', action='store_true',
         help="""Turn on rapid bootstrapping.""")
 
     parser.add_argument(
         '-s', '--seed', type=int, default=12345,
-        help="""A random number seed. This allows you to reproduce your 
+        help="""A random number seed. This allows you to reproduce your
             results and helps with debugging the program.""")
 
     parser.add_argument(
         '-o', '--output-prefix',
         help="""This is the prefix of all of the output files. So you can
-            identify different output file sets. You may include a directory 
+            identify different output file sets. You may include a directory
             as part of the prefix. This program will add suffixes to
             differentiate output files.""")
 
@@ -127,6 +143,11 @@ def parse_args():
         help="""This flag will keep the temporary files in the --temp-dir
             around for debugging.""")
 
+    parser.add_argument(
+        '--anysymbol', action='store_true',
+        help="""A mafft only option to handle when there are "U"s in aa
+            sequences.""")
+
     args = parser.parse_args()
 
     util.temp_dir_exists(args.temp_dir)
@@ -135,6 +156,7 @@ def parse_args():
         prefix = '{}_{}'.format(splitext(
             basename(__file__)), date.today().isoformat())
         args.output_prefix = join('.', prefix)
+    args.output_prefix = abspath(expanduser(args.output_prefix))
 
     return args
 

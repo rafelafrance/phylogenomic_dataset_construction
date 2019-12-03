@@ -7,10 +7,9 @@ import pylib.log as log
 
 
 def raxml(args, fasta_path, temp_dir):
-    """Run a raxml tree build."""
+    """Build a tree with raxml."""
     model = "PROTCATWAG" if args.seq_type == "aa" else "GTRCAT"
-    tree = basename(fasta_path)
-    tree, _ = splitext(tree)
+    tree, _ = splitext(basename(fasta_path))
     tree = tree + '.tre'
     cmd = ' '.join([
         'raxml',
@@ -19,25 +18,21 @@ def raxml(args, fasta_path, temp_dir):
         '-m {}'.format(model),
         '-s {}'.format(fasta_path),
         '-n {}'.format(tree)])
-    log.subcommand(cmd, temp_dir)
 
-    tree_src = join('RAxML_bestTree.' + tree)
-    tree_dst = join(args.output_prefix, tree)
-    shutil.move(tree_src, tree_dst)
+    with util.cd(temp_dir):
+        log.subcommand(cmd, '.')
 
-    util.remove_all('RAxML_log.*')
-    util.remove_all('RAxML_info.*')
-    util.remove_all('RAxML_result.*')
-    util.remove_all('RAxML_parsimonyTree.*')
+        tree_src = join('RAxML_bestTree.' + tree)
+        tree_dst = join(args.output_prefix, tree)
+        shutil.move(tree_src, tree_dst)
 
     return tree_dst
 
 
 def raxml_bs(args, fasta_path, temp_dir, replicates=100):
-    """Run a boot strapped raxml tree build."""
+    """Build a bootstrapped tree with raxml."""
     model = "PROTCATWAG" if args.seq_type == "aa" else "GTRCAT"
-    tree = basename(fasta_path)
-    tree, _ = splitext(tree)
+    tree, _ = splitext(basename(fasta_path))
     tree = tree + '.tre'
     cmd = ' '.join([
         'raxml',
@@ -49,18 +44,12 @@ def raxml_bs(args, fasta_path, temp_dir, replicates=100):
         '-# {}'.format(replicates),
         '-s {}'.format(fasta_path),
         '-n {}'.format(tree)])
-    log.subcommand(cmd, temp_dir)
 
-    tree_src = join('RAxML_bipartitions.' + tree)
-    tree_dst = join(args.output_prefix, tree)
-    shutil.move(tree_src, tree_dst)
+    with util.cd(temp_dir):
+        log.subcommand(cmd, '.')
 
-    util.remove_all('RAxML_log.*')
-    util.remove_all('RAxML_info.*')
-    util.remove_all('RAxML_result.*')
-    util.remove_all('RAxML_bestTree.*')
-    util.remove_all('RAxML_bootstrap.*')
-    util.remove_all('RAxML_parsimonyTree.*')
-    util.remove_all('RAxML_bipartitionsBranchLabels.*')
+        tree_src = join('RAxML_bipartitions.' + tree)
+        tree_dst = join(args.output_prefix, tree)
+        shutil.move(tree_src, tree_dst)
 
     return tree_dst

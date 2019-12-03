@@ -2,7 +2,7 @@
 
 import sys
 import os
-from os.path import exists
+from os.path import expanduser, exists
 from glob import glob
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -35,7 +35,18 @@ def make_temp_dir(where=None, prefix=None, keep=False):
             rmtree(temp_dir)
 
 
-def remove_all(pattern):
+@contextmanager
+def cd(new_dir):
+    """Change to a new working directory."""
+    prev_dir = os.getcwd()
+    os.chdir(expanduser(new_dir))
+    try:
+        yield
+    finally:
+        os.chdir(prev_dir)
+
+
+def remove_files(pattern):
     """Remove all files matching the given pattern."""
     for path in glob(pattern):
         os.remove(path)
