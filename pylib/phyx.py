@@ -1,4 +1,4 @@
-"""Wrapper for pxclsq from phyx."""
+"""Wrapper for phyx programs."""
 
 from os.path import basename, join, splitext
 from Bio.SeqIO.FastaIO import SimpleFastaParser
@@ -36,3 +36,18 @@ def pxclsq(args, fasta_path, temp_dir, min_occupancy, min_len=MIN_LEN):
                 bio.write_fasta_record(out_file, header, seq)
 
     return cleaned
+
+
+def pxrr(args, tree, temp_dir):
+    """Unroot the tree returned by treeshrink."""
+    unrooted = join(args.output_prefix, splitext(basename(tree))[0]) + '.tt'
+    cmd = ' '.join([
+        'pxrr',
+        '--unroot',
+        '--treef {}'.format(tree),
+        '--outf {}'.format(unrooted)])
+
+    with util.cd(temp_dir):
+        log.subcommand(cmd)
+
+    return unrooted

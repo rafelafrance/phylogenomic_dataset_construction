@@ -4,76 +4,11 @@
 
 import os
 from os.path import abspath, basename, expanduser, join, splitext
-from glob import glob
 from datetime import date
 import argparse
 import textwrap
 import pylib.util as util
-import pylib.bio as bio
-import pylib.log as log
-from pylib.mafft import mafft
-from pylib.raxml import raxml, raxml_bs
-from pylib.pxclsq import pxclsq, COLUMN_OCCUPANCY_LG, COLUMN_OCCUPANCY_SM
-from pylib.pasta import pasta
-from pylib.fasttree import fasttree
-
-
-def build_trees(args):
-    """Build the homology trees."""
-    with util.make_temp_dir(
-            where=args.temp_dir,
-            prefix='{}_'.format(splitext(basename(__file__))[0]),
-            keep=args.keep_temp_dir) as temp_dir:
-        log_file = join(args.output_prefix, 'log_file.txt')
-        log.setup(log_file)
-        fasta_paths = get_fasta_paths(args)
-        long_seq_check(fasta_paths, args.seq_type)
-        fasta_to_tree(args, fasta_paths, temp_dir)
-
-
-def fasta_to_tree(args, fasta_paths, temp_dir):
-    """Build trees from the fasta files."""
-    for fasta in fasta_paths:
-        seq_count = bio.fasta_record_count(fasta)
-
-        if seq_count < bio.MIN_SEQ:
-            log.warn('"{}" has fewer than {} records, skipping.'.format(
-                fasta, bio.MIN_SEQ))
-            continue
-
-        if args.bootstrap:
-            alignment = mafft(args, fasta, temp_dir)
-            cleaned = pxclsq(args, alignment, temp_dir, COLUMN_OCCUPANCY_LG)
-            tree = raxml_bs(args, cleaned, temp_dir)
-        elif seq_count >= bio.SEQ_COUNT_CUTOFF:
-            alignment = pasta(args, fasta, temp_dir)
-            cleaned = pxclsq(args, alignment, temp_dir, COLUMN_OCCUPANCY_SM)
-            tree = fasttree(args, cleaned, temp_dir)
-        else:
-            alignment = mafft(args, fasta, temp_dir)
-            cleaned = pxclsq(args, alignment, temp_dir, COLUMN_OCCUPANCY_SM)
-            tree = raxml(args, cleaned, temp_dir)
-
-
-def get_fasta_paths(args):
-    """Get the fasta files to process."""
-    pattern = join(args.assemblies_dir, args.file_filter)
-    fasta_paths = sorted([abspath(p) for p in glob(pattern)])
-    if len(fasta_paths) == 0:
-        log.fatal('No files were found with this mask: "{}".'.format(pattern))
-    return fasta_paths
-
-
-def long_seq_check(fasta_paths, seq_type):
-    """Warn about really long sequences."""
-    for fasta_path in fasta_paths:
-        longest = bio.longest_fasta_seq(fasta_path)
-        if bio.too_long(longest, seq_type):
-            seq_count = bio.fasta_record_count(fasta_path)
-            log.warn(util.shorten("""{} has {} sequences.
-                The longest is {} characters.
-                This is too long and may crash the alignment process.
-                """.format(fasta_path, seq_count, longest)))
+from pylib.core_homology_trees import build_trees
 
 
 def parse_args():
@@ -145,6 +80,11 @@ def parse_args():
         '--anysymbol', action='store_true',
         help="""A mafft only option to handle when there are "U"s in aa
             sequences.""")
+
+    parser.add_argument(
+        '-q', '--quantiles', type=float, default=0.05,
+        help="""A TreeShrink only option for tree trimming quantiles. The
+            default is 0.05.""")
 
     args = parser.parse_args()
 

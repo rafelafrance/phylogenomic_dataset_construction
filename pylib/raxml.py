@@ -1,7 +1,7 @@
 """Wrap raxml functions."""
 
 from os.path import basename, join, splitext
-import shutil
+from shutil import move
 import pylib.util as util
 import pylib.log as log
 
@@ -24,7 +24,7 @@ def raxml(args, fasta_path, temp_dir):
 
         tree_src = join('RAxML_bestTree.' + tree)
         tree_dst = join(args.output_prefix, tree)
-        shutil.move(tree_src, tree_dst)
+        move(tree_src, tree_dst)
 
     return tree_dst
 
@@ -50,6 +50,6 @@ def raxml_bs(args, fasta_path, temp_dir, replicates=100):
 
         tree_src = join('RAxML_bipartitions.' + tree)
         tree_dst = join(args.output_prefix, tree)
-        shutil.move(tree_src, tree_dst)
+        move(tree_src, tree_dst)
 
     return tree_dst

@@ -37,7 +37,6 @@ def trim(inDIR, tree_file_ending, q, outDIR):
 
     # go into each TS folder and change extension from 'tree_file_ending'
     # to ts
-
     for f in os.listdir(outDIR):
         if f.endswith(".ts_dir"):
             for t in os.listdir(outDIR + f):

@@ -1,7 +1,7 @@
 """Wrap pasta functions."""
 
 from os.path import abspath, basename, join, splitext
-from shutil import copy
+from shutil import move
 import pylib.util as util
 import pylib.log as log
 import pylib.bio as bio
@@ -25,7 +25,7 @@ def pasta(args, fasta_path, temp_dir):
     base_name = splitext(basename(fasta_path))[0]
     temp_aligned = join(temp_dir, 'pastajob.marker001.' + base_name + '.aln')
     aligned = join(args.output_prefix, base_name + '.aligned')
-    copy(temp_aligned, aligned)
+    move(temp_aligned, aligned)
 
     util.remove_files(join(temp_dir, 'pastajob*'))
 
