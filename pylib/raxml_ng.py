@@ -1,4 +1,4 @@
-"""Wrap raxml functions."""
+"""Wrap raxml-ng functions."""
 
 from os.path import basename, join, splitext
 from shutil import move
@@ -6,13 +6,13 @@ import pylib.util as util
 import pylib.log as log
 
 
-def raxml(fasta_file, args):
+def raxml_ng(fasta_file, args):
     """Build a tree with raxml."""
-    model = "PROTCATWAG" if args.seq_type == "aa" else "GTRCAT"
+    model = "Blosum62" if args.seq_type == "aa" else "GTR"
     tree, _ = splitext(basename(fasta_file))
     tree = tree + '.tre'
     cmd = ' '.join([
-        'raxml',
+        'raxml-ng',
         '-T {}'.format(args.cpus),
         '-p {}'.format(args.seed),
         '-m {}'.format(model),
@@ -29,13 +29,13 @@ def raxml(fasta_file, args):
     return tree_dst
 
 
-def raxml_bs(fasta_file, args, replicates=100):
+def raxml_ng_bs(fasta_file, args, replicates=100):
     """Build a bootstrapped tree with raxml."""
-    model = "PROTCATWAG" if args.seq_type == "aa" else "GTRCAT"
+    model = "Blosum62" if args.seq_type == "aa" else "GTR"
     tree, _ = splitext(basename(fasta_file))
     tree = tree + '.tre'
     cmd = ' '.join([
-        'raxml',
+        'raxml-ng',
         '-T {}'.format(args.cpus),
         '-f a',
         '-x {}'.format(args.seed),

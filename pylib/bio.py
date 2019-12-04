@@ -21,7 +21,7 @@ def reverse_complement(seq):
     return seq.translate(COMPLEMENT)[::-1]
 
 
-def too_long(seq_len, seq_type):
+def seqs_too_long(seq_len, seq_type):
     """Check if the sequence is too long for the alignment process."""
     if seq_type == 'aa':
         max_len = SEQ_LEN_CUTOFF
@@ -30,9 +30,9 @@ def too_long(seq_len, seq_type):
     return seq_len >= max_len
 
 
-def read_fasta(fasta_path):
+def read_fasta(fasta_file):
     """Read in a fasta file for further processing."""
-    with open(fasta_path) as fasta_file:
+    with open(fasta_file) as fasta_file:
         return [s for s in SimpleFastaParser(fasta_file)]
 
 
@@ -55,11 +55,11 @@ def adjust_aa_seq(seq):
     return re.sub(r'\*.*', '', seq)
 
 
-def adjust_aa_seqs(fasta_path, temp_dir):
+def adjust_aa_seqs(fasta_file, temp_dir):
     """Fix up amino acid sequences."""
-    out_path = join(temp_dir, splitext(basename(fasta_path))[0]) + '_aa.fasta'
+    out_path = join(temp_dir, splitext(basename(fasta_file))[0]) + '_aa.fasta'
 
-    with open(fasta_path) as in_file, open(out_path, 'w') as out_file:
+    with open(fasta_file) as in_file, open(out_path, 'w') as out_file:
         for header, seq in SimpleFastaParser(in_file):
             seq = adjust_aa_seq(seq)
             write_fasta_record(out_file, header, seq)

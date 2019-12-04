@@ -9,11 +9,11 @@ import pylib.bio as bio
 MAX_ITERATE = 10_000
 
 
-def mafft(args, fasta_path, temp_dir):
+def mafft(fasta_file, args):
     """Align sequences."""
-    in_path = fasta_path
+    in_path = fasta_file
     if args.seq_type == 'aa':
-        in_path = bio.adjust_aa_seqs(fasta_path, temp_dir)
+        in_path = bio.adjust_aa_seqs(fasta_file, args.temp_dir)
 
     cmd = [
         'mafft',
@@ -33,10 +33,10 @@ def mafft(args, fasta_path, temp_dir):
     cmd.append(in_path)
     cmd = ' '.join(cmd)
 
-    aligned = join(args.output_prefix, splitext(basename(fasta_path))[0])
-    aligned += '.aligned'
+    aligned = join(args.output_dir, splitext(basename(fasta_file))[0])
+    aligned += '.aln'
 
-    with util.cd(temp_dir):
+    with util.cd(args.temp_dir):
         log.subcommand(cmd, out_path=aligned)
 
     return aligned

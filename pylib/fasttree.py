@@ -5,17 +5,17 @@ import pylib.util as util
 import pylib.log as log
 
 
-def fasttree(args, fasta_path, temp_dir):
+def fasttree(fasta_file, args):
     """Build a tree with fasttree."""
     cmd = ['fasttree', '-quiet']
     cmd += ['-wag'] if args.seq_type == 'aa' else ['-nt', '-gtr']
-    cmd.append(fasta_path)
+    cmd.append(fasta_file)
     cmd = ' '.join(cmd)
 
-    tree = join(args.output_prefix, splitext(basename(fasta_path))[0])
-    tree += '.aligned'
+    tree_file = join(args.output_dir, splitext(basename(fasta_file))[0])
+    tree_file += '.aligned'
 
-    with util.cd(temp_dir):
-        log.subcommand(cmd, out_path=tree)
+    with util.cd(args.temp_dir):
+        log.subcommand(cmd, out_path=tree_file)
 
-    return tree
+    return tree_file

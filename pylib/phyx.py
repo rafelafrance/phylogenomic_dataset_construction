@@ -12,23 +12,23 @@ COLUMN_OCCUPANCY_LG = 0.2
 MIN_LEN = 10
 
 
-def pxclsq(args, fasta_path, temp_dir, min_occupancy, min_len=MIN_LEN):
+def pxclsq(fasta_file, args, min_occupancy, min_len=MIN_LEN):
     """Filter aligned sequences for occupancy and length."""
-    temp_cleaned = join(temp_dir, splitext(basename(fasta_path))[0])
+    temp_cleaned = join(args.temp_dir, splitext(basename(fasta_file))[0])
     temp_cleaned += '_cleaned.fasta'
 
     cmd = ' '.join([
         'pxclsq',
         '--aminoacid' if args.seq_type == 'aa' else '',
         '--prop {}'.format(min_occupancy),
-        '--seqf {}'.format(fasta_path),
+        '--seqf {}'.format(fasta_file),
         '--outf {}'.format(basename(temp_cleaned))])
 
-    with util.cd(temp_dir):
+    with util.cd(args.temp_dir):
         log.subcommand(cmd)
 
-    cleaned = join(args.output_prefix, splitext(basename(fasta_path))[0])
-    cleaned += '_cleaned.fasta'
+    cleaned = join(args.output_dir, splitext(basename(fasta_file))[0])
+    cleaned += '.cln'
 
     with open(temp_cleaned) as in_file, open(cleaned, 'w') as out_file:
         for header, seq in SimpleFastaParser(in_file):
@@ -38,16 +38,16 @@ def pxclsq(args, fasta_path, temp_dir, min_occupancy, min_len=MIN_LEN):
     return cleaned
 
 
-def pxrr(args, tree, temp_dir):
+def pxrr(tree_file, args):
     """Unroot the tree returned by treeshrink."""
-    unrooted = join(args.output_prefix, splitext(basename(tree))[0]) + '.tt'
+    unrooted = join(args.output_dir, splitext(basename(tree_file))[0] + '.tt')
     cmd = ' '.join([
         'pxrr',
         '--unroot',
-        '--treef {}'.format(tree),
+        '--treef {}'.format(tree_file),
         '--outf {}'.format(unrooted)])
 
-    with util.cd(temp_dir):
+    with util.cd(args.temp_dir):
         log.subcommand(cmd)
 
     return unrooted

@@ -3,12 +3,11 @@
 """Build homology trees."""
 
 import os
-from os.path import abspath, basename, expanduser, join, splitext
-from datetime import date
+from os.path import abspath, expanduser
 import argparse
 import textwrap
 import pylib.util as util
-from pylib.core_homology_trees import build_trees
+from pylib.core_homology_trees import pipeline
 
 
 def parse_args():
@@ -60,11 +59,9 @@ def parse_args():
             results and helps with debugging the program.""")
 
     parser.add_argument(
-        '-o', '--output-prefix',
-        help="""This is the prefix of all of the output files. So you can
-            identify different output file sets. You may include a directory
-            as part of the prefix. This program will add suffixes to
-            differentiate output files.""")
+        '-o', '--output-dir', default='.',
+        help="""Place output files in this directory. The default is the
+            current directory.""")
 
     parser.add_argument(
         '--temp-dir', metavar='DIR',
@@ -86,19 +83,19 @@ def parse_args():
         help="""A TreeShrink only option for tree trimming quantiles. The
             default is 0.05.""")
 
+    parser.add_argument(
+        '--mask-paraphyletic', action='store_true',
+        help="""When masking tree tips, do you want to also mask paraphyletic
+            tips.""")
+
     args = parser.parse_args()
 
+    args.output_dir = abspath(expanduser(args.output_dir))
     util.temp_dir_exists(args.temp_dir)
-
-    if not args.output_prefix:
-        prefix = '{}_{}'.format(splitext(
-            basename(__file__)), date.today().isoformat())
-        args.output_prefix = join('.', prefix)
-    args.output_prefix = abspath(expanduser(args.output_prefix))
 
     return args
 
 
 if __name__ == "__main__":
     ARGS = parse_args()
-    build_trees(ARGS)
+    pipeline(ARGS)

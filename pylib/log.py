@@ -7,8 +7,8 @@ import subprocess
 import pylib.util as util
 
 LOGGER = None  # Global logger so we can switch between processes
-FORMATTER = logging.Formatter('%(asctime)s %(levelname)s: %(message)s',
-                              datefmt='%Y-%m-%d %H:%M:%S')
+FORMATTER = logging.Formatter(
+    '%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 NAME = 'pdc_logger'
 
 

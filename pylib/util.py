@@ -2,7 +2,7 @@
 
 import sys
 import os
-from os.path import expanduser, exists
+from os.path import expanduser, exists, join, split
 from glob import glob
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -11,6 +11,10 @@ from contextlib import contextmanager
 
 __VERSION__ = '2.0.0'
 __TITLE__ = 'Phylogenomic Dataset Construction'
+
+
+class StopProcessing(Exception):
+    """Stop processing the item in the pipeline."""
 
 
 def shorten(text):
