@@ -68,8 +68,8 @@ def mask_tips(fasta_file, tree_file, args):
     with open(tree_file) as in_file:
         in_tree = newick3.parse(in_file.readline())
 
-    chars = {s[0]: len(IGNORE.sub('', s[1]))
-             for s in bio.read_fasta(fasta_file)}
+    chars = {k: len(IGNORE.sub('', v))
+             for k, v in bio.read_fasta(fasta_file).items()}
 
     output = join(args.output_dir, splitext(basename(tree_file))[0]) + '.mm'
 
@@ -80,3 +80,5 @@ def mask_tips(fasta_file, tree_file, args):
 
     with open(output, 'w') as outfile:
         outfile.write(newick3.tostring(root) + ";\n")
+
+    return output

@@ -4,6 +4,7 @@
 
 from os.path import abspath, basename, join, splitext
 from glob import glob
+from oldlib.mask_tips import mask_tips
 import pylib.util as util
 import pylib.bio as bio
 import pylib.log as log
@@ -13,7 +14,7 @@ from pylib.phyx import pxclsq, pxrr, COLUMN_OCCUPANCY_LG, COLUMN_OCCUPANCY_SM
 from pylib.pasta import pasta
 from pylib.fasttree import fasttree
 from pylib.treeshrink import treeshrink
-from oldlib.mask_tips import mask_tips
+from pylib.tree_to_fasta import tree_to_fasta
 
 
 def pipeline(args):
@@ -31,7 +32,7 @@ def pipeline(args):
                 fasta_to_tree(data, args)
                 tree_shrink(data, args)
                 mask_tree(data, args)
-                fasta_from_tree(data, args)
+                new_fasta(data, args)
 
             except util.StopProcessing:
                 pass
@@ -46,7 +47,7 @@ def setup(args, temp_dir):
 
 def get_fasta_files(args):
     """Get the fasta data to process."""
-    log.info('Gathering fasta files.')
+    log.info('Gathering fasta files')
     pattern = join(args.assemblies_dir, args.file_filter)
     fasta_files = sorted([abspath(p) for p in glob(pattern)])
     if len(fasta_files) == 0:
@@ -56,7 +57,7 @@ def get_fasta_files(args):
 
 def too_few_records(data):
     """Check if the fasta file is too small to make a good tree."""
-    log.info('Checking fasta for {}'.format(basename(data['fasta'])))
+    log.info('Checking fasta for {}'.format(log_name(data['fasta'])))
 
     if bio.fasta_record_count(data['fasta']) < bio.MIN_SEQ:
         log.warn('"{}" has fewer than {} records, skipping.'.format(
@@ -79,7 +80,7 @@ def seq_too_long(data, args):
 def fasta_to_tree(data, args):
     """Build trees from the fasta data."""
     log.info('Converting fasta to tree for {}'.format(
-        basename(data['fasta'])))
+        log_name(data['fasta'])))
 
     if args.bootstrap:
         data['aligned'] = mafft(data['fasta'], args)
@@ -97,7 +98,7 @@ def fasta_to_tree(data, args):
 
 def tree_shrink(data, args):
     """Remove long branches from trees."""
-    log.info('Shrinking tree for {}'.format(basename(data['fasta'])))
+    log.info('Shrinking tree for {}'.format(log_name(data['fasta'])))
 
     data['trimmed'] = treeshrink(data['tree'], args)
     data['unrooted'] = pxrr(data['trimmed'], args)
@@ -105,12 +106,19 @@ def tree_shrink(data, args):
 
 def mask_tree(data, args):
     """Mask mono- and paraphyletic-tips that belong to the same taxon."""
-    log.info('Masking tree tips for {}'.format(basename(data['fasta'])))
+    log.info('Masking tree tips for {}'.format(log_name(data['fasta'])))
 
     data['masked'] = mask_tips(data['cleaned'], data['unrooted'], args)
 
 
-def fasta_from_tree(data, args):
+def new_fasta(data, args):
     """Mask mono- and paraphyletic-tips that belong to the same taxon."""
     log.info('Converting masked tree to fasta for {}'.format(
-        basename(data['fasta'])))
+        log_name(data['fasta'])))
+
+    data['fasta2'] = tree_to_fasta(data['fasta'], data['masked'], args)
+
+
+def log_name(path):
+    """Update the file path to something more readable for the logs."""
+    return '"{}"'.format(splitext(basename(path))[0])

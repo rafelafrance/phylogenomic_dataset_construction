@@ -33,7 +33,7 @@ def seqs_too_long(seq_len, seq_type):
 def read_fasta(fasta_file):
     """Read in a fasta file for further processing."""
     with open(fasta_file) as fasta_file:
-        return [s for s in SimpleFastaParser(fasta_file)]
+        return {s[0]: s[1] for s in SimpleFastaParser(fasta_file)}
 
 
 def fasta_record_count(fasta):

@@ -18,7 +18,7 @@ def mask_tips(fasta_file, tree_file, args):
     tree = Phylo.read(tree_file, 'newick')
     print(tree)
     char_count = {s[0]: len(IGNORE.sub('', s[1]))
-                  for s in bio.read_fasta(fasta_file)}
+                  for s in bio.read_fasta(fasta_file).values()}
     mask_monophyletic_tips(tree, char_count)
     if args.mask_paraphyletic:
         mask_paraphyletic_tips(tree, char_count)
