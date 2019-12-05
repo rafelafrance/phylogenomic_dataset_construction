@@ -54,3 +54,8 @@ def remove_files(pattern):
     """Remove all files matching the given pattern."""
     for path in glob(pattern):
         os.remove(path)
+
+
+def taxon_id(header):
+    """Split the name and return the taxon ID part."""
+    return header.split('@')[0]

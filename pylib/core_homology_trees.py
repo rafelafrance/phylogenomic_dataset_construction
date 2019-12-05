@@ -13,7 +13,7 @@ from pylib.phyx import pxclsq, pxrr, COLUMN_OCCUPANCY_LG, COLUMN_OCCUPANCY_SM
 from pylib.pasta import pasta
 from pylib.fasttree import fasttree
 from pylib.treeshrink import treeshrink
-from pylib.mask_tips import mask_tips
+from oldlib.mask_tips import mask_tips
 
 
 def pipeline(args):
@@ -24,15 +24,14 @@ def pipeline(args):
             keep=args.keep_temp_dir) as temp_dir:
         setup(args, temp_dir)
 
-        for files in get_fasta_files(args):
-            print(files)
+        for data in get_fasta_files(args):
             try:
-                too_few_records(files)
-                seqs_too_long(files, args)
-                fasta_to_tree(files, args)
-                tree_shrink(files, args)
-                mask_tree(files, args)
-                fasta_from_tree(files, args)
+                too_few_records(data)
+                seq_too_long(data, args)
+                fasta_to_tree(data, args)
+                tree_shrink(data, args)
+                mask_tree(data, args)
+                fasta_from_tree(data, args)
 
             except util.StopProcessing:
                 pass
@@ -46,59 +45,72 @@ def setup(args, temp_dir):
 
 
 def get_fasta_files(args):
-    """Get the fasta files to process."""
+    """Get the fasta data to process."""
+    log.info('Gathering fasta files.')
     pattern = join(args.assemblies_dir, args.file_filter)
     fasta_files = sorted([abspath(p) for p in glob(pattern)])
     if len(fasta_files) == 0:
-        log.fatal('No files were found with this mask: "{}".'.format(pattern))
+        log.fatal('No data were found with this mask: "{}".'.format(pattern))
     return [{'fasta': f} for f in fasta_files]
 
 
-def too_few_records(files):
+def too_few_records(data):
     """Check if the fasta file is too small to make a good tree."""
-    if bio.fasta_record_count(files['fasta']) < bio.MIN_SEQ:
+    log.info('Checking fasta for {}'.format(basename(data['fasta'])))
+
+    if bio.fasta_record_count(data['fasta']) < bio.MIN_SEQ:
         log.warn('"{}" has fewer than {} records, skipping.'.format(
-            files['fasta'], bio.MIN_SEQ))
+            data['fasta'], bio.MIN_SEQ))
         raise util.StopProcessing()
 
 
-def seqs_too_long(files, args):
+def seq_too_long(data, args):
     """Warn about really long sequences."""
-    longest = bio.longest_fasta_seq(files['fasta'])
+    longest = bio.longest_fasta_seq(data['fasta'])
+
     if bio.seqs_too_long(longest, args.seq_type):
-        seq_count = bio.fasta_record_count(files['fasta'])
+        seq_count = bio.fasta_record_count(data['fasta'])
         log.warn(util.shorten("""{} has {} sequences.
             The longest is {} characters.
             This is too long and may crash the alignment process.
-            """.format(files['fasta'], seq_count, longest)))
+            """.format(data['fasta'], seq_count, longest)))
 
 
-def fasta_to_tree(files, args):
-    """Build trees from the fasta files."""
+def fasta_to_tree(data, args):
+    """Build trees from the fasta data."""
+    log.info('Converting fasta to tree for {}'.format(
+        basename(data['fasta'])))
+
     if args.bootstrap:
-        files['alignment'] = mafft(files['fasta'], args)
-        files['pxclsq'] = pxclsq(files['alignment'], args, COLUMN_OCCUPANCY_LG)
-        files['tree'] = raxml_bs(files['pxclsq'], args)
-    elif bio.fasta_record_count(files['fasta']) >= bio.SEQ_COUNT_CUTOFF:
-        files['alignment'] = pasta(files['fasta'], args)
-        files['pxclsq'] = pxclsq(files['alignment'], args, COLUMN_OCCUPANCY_SM)
-        files['tree'] = fasttree(files['pxclsq'], args)
+        data['aligned'] = mafft(data['fasta'], args)
+        data['cleaned'] = pxclsq(data['aligned'], args, COLUMN_OCCUPANCY_LG)
+        data['tree'] = raxml_bs(data['cleaned'], args)
+    elif bio.fasta_record_count(data['fasta']) >= bio.SEQ_COUNT_CUTOFF:
+        data['aligned'] = pasta(data['fasta'], args)
+        data['cleaned'] = pxclsq(data['aligned'], args, COLUMN_OCCUPANCY_SM)
+        data['tree'] = fasttree(data['cleaned'], args)
     else:
-        files['alignment'] = mafft(files['fasta'], args)
-        files['pxclsq'] = pxclsq(files['alignment'], args, COLUMN_OCCUPANCY_SM)
-        files['tree'] = raxml(files['pxclsq'], args)
+        data['aligned'] = mafft(data['fasta'], args)
+        data['cleaned'] = pxclsq(data['aligned'], args, COLUMN_OCCUPANCY_SM)
+        data['tree'] = raxml(data['cleaned'], args)
 
 
-def tree_shrink(files, args):
+def tree_shrink(data, args):
     """Remove long branches from trees."""
-    files['treeshrink'] = treeshrink(files['tree'], args)
-    files['pxrr'] = pxrr(files['treeshrink'], args)
+    log.info('Shrinking tree for {}'.format(basename(data['fasta'])))
+
+    data['trimmed'] = treeshrink(data['tree'], args)
+    data['unrooted'] = pxrr(data['trimmed'], args)
 
 
-def mask_tree(files, args):
+def mask_tree(data, args):
     """Mask mono- and paraphyletic-tips that belong to the same taxon."""
-    mask_tips(files['pxclsq'], files['pxrr'], args)
+    log.info('Masking tree tips for {}'.format(basename(data['fasta'])))
+
+    data['masked'] = mask_tips(data['cleaned'], data['unrooted'], args)
 
 
-def fasta_from_tree(files, args):
+def fasta_from_tree(data, args):
     """Mask mono- and paraphyletic-tips that belong to the same taxon."""
+    log.info('Converting masked tree to fasta for {}'.format(
+        basename(data['fasta'])))

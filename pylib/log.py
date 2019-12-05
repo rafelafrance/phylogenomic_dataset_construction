@@ -43,7 +43,7 @@ def subcommand(cmd, temp_dir='.', timeout=None, out_path=None):
     Note: stdout=PIPE is blocking and large logs cause a hang.
     So we don't use it.
     """
-    LOGGER.info(cmd)
+    LOGGER.debug(cmd)
 
     with tempfile.NamedTemporaryFile(mode='w', dir=temp_dir) as log_output:
         out_path = out_path if out_path else log_output.name
