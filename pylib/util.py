@@ -2,7 +2,7 @@
 
 import sys
 import os
-from os.path import expanduser, exists, join, split
+from os.path import expanduser, exists
 from glob import glob
 from shutil import rmtree
 from tempfile import mkdtemp

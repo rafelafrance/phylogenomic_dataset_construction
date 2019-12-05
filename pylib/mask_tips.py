@@ -3,8 +3,8 @@
 import re
 from os.path import basename, join, splitext
 from itertools import groupby
-from pylib.util import taxon_id
 from Bio import Phylo
+from pylib.util import taxon_id
 import pylib.bio as bio
 
 
@@ -20,8 +20,8 @@ def mask_tips(fasta_file, tree_file, args):
     char_count = {s[0]: len(IGNORE.sub('', s[1]))
                   for s in bio.read_fasta(fasta_file).values()}
     mask_monophyletic_tips(tree, char_count)
-    if args.mask_paraphyletic:
-        mask_paraphyletic_tips(tree, char_count)
+    # if args.mask_paraphyletic:
+    #     mask_paraphyletic_tips(tree, char_count)
 
     output = join(args.output_dir, splitext(basename(tree_file))[0]) + '.mm'
     Phylo.write(tree, output, 'newick')
@@ -41,5 +41,5 @@ def mask_monophyletic_tips(tree, char_count):
                     tree.prune(node)
 
 
-def mask_paraphyletic_tips(tree, char_count):
-    """Mask paraphyletic tips."""
+# def mask_paraphyletic_tips(tree, char_count):
+#     """Mask paraphyletic tips."""
