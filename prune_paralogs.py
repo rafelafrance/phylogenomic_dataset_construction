@@ -29,7 +29,7 @@ def parse_args():
                     out-groups reroot and cut paralog from root to tip.
               rt:   rune by extracting in-group clades and then cut paralogs
                     from root to tip. If no out-group, only use those that do
-                    not have duplicated taxa. 
+                    not have duplicated taxa.
             """))
 
     parser.add_argument(

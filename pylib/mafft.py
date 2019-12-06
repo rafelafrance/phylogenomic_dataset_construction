@@ -1,5 +1,7 @@
 """Wrap mafft alignment tool."""
 
+# pylint: disable=too-many-arguments
+
 from os.path import basename, join, splitext
 from . import util
 from . import log
@@ -9,17 +11,17 @@ from . import bio
 MAX_ITERATE = 10_000
 
 
-def mafft(fasta_file, args):
+def mafft(fasta_file, output_dir, temp_dir, seq_type, cpus, anysymbol):
     """Align sequences."""
     in_path = fasta_file
-    if args.seq_type == 'aa':
-        in_path = bio.adjust_aa_seqs(fasta_file, args.temp_dir)
+    if seq_type == 'aa':
+        in_path = bio.adjust_aa_seqs(fasta_file, temp_dir)
 
     cmd = [
         'mafft',
-        '--amino' if args.seq_type == 'aa' else '--nuc',
-        '--thread {}'.format(args.cpus),
-        '--anysymbol' if args.anysymbol else '']
+        '--amino' if seq_type == 'aa' else '--nuc',
+        '--thread {}'.format(cpus),
+        '--anysymbol' if anysymbol else '']
 
     if bio.fasta_record_count(in_path) >= bio.SEQ_COUNT_CUTOFF \
             or bio.longest_fasta_seq(in_path) >= bio.SEQ_LEN_CUTOFF:
@@ -28,15 +30,15 @@ def mafft(fasta_file, args):
         cmd += [
             '--genafpair',
             '--maxiterate {}'.format(MAX_ITERATE),
-            '--anysymbol' if args.anysymbol else '']
+            '--anysymbol' if anysymbol else '']
 
     cmd.append(in_path)
     cmd = ' '.join(cmd)
 
-    aligned = join(args.output_dir, splitext(basename(fasta_file))[0])
+    aligned = join(output_dir, splitext(basename(fasta_file))[0])
     aligned += '.aln'
 
-    with util.cd(args.temp_dir):
+    with util.cd(temp_dir):
         log.subcommand(cmd, out_path=aligned)
 
     return aligned

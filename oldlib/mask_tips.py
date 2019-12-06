@@ -15,6 +15,27 @@ from .tree_utils import get_name, remove_kink
 IGNORE = re.compile(r'[x*?\-]', re.IGNORECASE)
 
 
+def mask_tips(fasta_file, tree_file, output_dir, mask_paraphyletic):
+    """Wrap tree tip removal."""
+    with open(tree_file) as in_file:
+        in_tree = newick3.parse(in_file.readline())
+
+    chars = {k: len(IGNORE.sub('', v))
+             for k, v in bio.read_fasta(fasta_file).items()}
+
+    output = join(output_dir, splitext(basename(tree_file))[0]) + '.mm'
+
+    root = mask_monophyletic_tips(in_tree, chars)
+
+    if mask_paraphyletic:
+        root = mask_paraphyletic_tips(root, chars)
+
+    with open(output, 'w') as outfile:
+        outfile.write(newick3.tostring(root) + ";\n")
+
+    return output
+
+
 def mask_monophyletic_tips(root, chars):
     going = True
     while going and len(root.leaves()) >= 4:
@@ -46,7 +67,7 @@ def mask_paraphyletic_tips(root, chars):
             if not node.istip:
                 continue  # only look at tips
             parent = node.parent
-            if node == root or parent == root:
+            if root in (node, parent):
                 continue  # no paraphyletic tips for the root
             for para in parent.get_sisters():
                 if para.istip and get_name(node.label) == get_name(para.label):
@@ -61,24 +82,3 @@ def mask_paraphyletic_tips(root, chars):
                     going = True
                     break
     return root
-
-
-def mask_tips(fasta_file, tree_file, args):
-    """Wrap tree tip removal."""
-    with open(tree_file) as in_file:
-        in_tree = newick3.parse(in_file.readline())
-
-    chars = {k: len(IGNORE.sub('', v))
-             for k, v in bio.read_fasta(fasta_file).items()}
-
-    output = join(args.output_dir, splitext(basename(tree_file))[0]) + '.mm'
-
-    root = mask_monophyletic_tips(in_tree, chars)
-
-    if args.mask_paraphyletic:
-        root = mask_paraphyletic_tips(root, chars)
-
-    with open(output, 'w') as outfile:
-        outfile.write(newick3.tostring(root) + ";\n")
-
-    return output

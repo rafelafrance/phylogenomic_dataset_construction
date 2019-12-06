@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument(
         '-t', '--seq-type', default='dna',
         choices=['dna', 'aa'],
-        help="""Are building trees from DNA or amino acid sequences. The
+        help="""Are we building trees from DNA or amino acid sequences. The
             default is "dna".""")
 
     parser.add_argument(

@@ -5,17 +5,17 @@ from . import util
 from . import log
 
 
-def fasttree(fasta_file, args):
+def fasttree(fasta_file, output_dir, temp_dir, seq_type):
     """Build a tree with fasttree."""
     cmd = ['fasttree', '-quiet']
-    cmd += ['-wag'] if args.seq_type == 'aa' else ['-nt', '-gtr']
+    cmd += ['-wag'] if seq_type == 'aa' else ['-nt', '-gtr']
     cmd.append(fasta_file)
     cmd = ' '.join(cmd)
 
-    tree_file = join(args.output_dir, splitext(basename(fasta_file))[0])
+    tree_file = join(output_dir, splitext(basename(fasta_file))[0])
     tree_file += '.aligned'
 
-    with util.cd(args.temp_dir):
+    with util.cd(temp_dir):
         log.subcommand(cmd, out_path=tree_file)
 
     return tree_file

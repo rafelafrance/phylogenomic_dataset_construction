@@ -13,7 +13,7 @@ IGNORE = re.compile(r'[x*?\-]', re.IGNORECASE)
 MIN_TREE = 4
 
 
-def mask_tips(fasta_file, tree_file, args):
+def mask_tips(fasta_file, tree_file, output_dir):
     """Wrap tree tip removal."""
     tree = Phylo.read(tree_file, 'newick')
     print(tree)
@@ -23,7 +23,7 @@ def mask_tips(fasta_file, tree_file, args):
     # if args.mask_paraphyletic:
     #     mask_paraphyletic_tips(tree, char_count)
 
-    output = join(args.output_dir, splitext(basename(tree_file))[0]) + '.mm'
+    output = join(output_dir, splitext(basename(tree_file))[0]) + '.mm'
     Phylo.write(tree, output, 'newick')
 
 

@@ -81,32 +81,53 @@ def fasta_to_tree(data, args):
         log_name(data['fasta'])))
 
     if args.bootstrap:
-        data['aligned'] = mafft(data['fasta'], args)
-        data['cleaned'] = pxclsq(data['aligned'], args, COLUMN_OCCUPANCY_LG)
-        data['tree'] = raxml_bs(data['cleaned'], args)
+        data['aligned'] = mafft(
+            data['fasta'], args.output_dir, args.temp_dir,
+            args.seq_type, args.cpus, args.anysymbol)
+        data['cleaned'] = pxclsq(
+            data['aligned'], args.output_dir, args.temp_dir,
+            args.seq_type, COLUMN_OCCUPANCY_LG)
+        data['tree'] = raxml_bs(
+            data['cleaned'], args.output_dir, args.temp_dir,
+            args.seq_type, args.cpus, args.seed)
+
     elif bio.fasta_record_count(data['fasta']) >= bio.SEQ_COUNT_CUTOFF:
-        data['aligned'] = pasta(data['fasta'], args)
-        data['cleaned'] = pxclsq(data['aligned'], args, COLUMN_OCCUPANCY_SM)
-        data['tree'] = fasttree(data['cleaned'], args)
+        data['aligned'] = pasta(
+            data['fasta'], args.output_dir, args.temp_dir, args.seq_type)
+        data['cleaned'] = pxclsq(
+            data['aligned'], args.output_dir, args.temp_dir,
+            args.seq_type, COLUMN_OCCUPANCY_SM)
+        data['tree'] = fasttree(
+            data['cleaned'], args.output_dir, args.temp_dir, args.seq_type)
+
     else:
-        data['aligned'] = mafft(data['fasta'], args)
-        data['cleaned'] = pxclsq(data['aligned'], args, COLUMN_OCCUPANCY_SM)
-        data['tree'] = raxml(data['cleaned'], args)
+        data['aligned'] = mafft(
+            data['fasta'], args.output_dir, args.temp_dir,
+            args.seq_type, args.cpus, args.anysymbol)
+        data['cleaned'] = pxclsq(
+            data['aligned'], args.output_dir, args.temp_dir,
+            args.seq_type, COLUMN_OCCUPANCY_SM)
+        data['tree'] = raxml(
+            data['cleaned'], args.output_dir, args.temp_dir,
+            args.seq_type, args.cpus, args.seed)
 
 
 def tree_shrink(data, args):
     """Remove long branches from trees."""
     log.info('Shrinking tree for {}'.format(log_name(data['fasta'])))
 
-    data['trimmed'] = treeshrink(data['tree'], args)
-    data['unrooted'] = pxrr(data['trimmed'], args)
+    data['trimmed'] = treeshrink(
+        data['tree'], args.output_dir, args.temp_dir, args.quantiles)
+    data['unrooted'] = pxrr(data['trimmed'], args.output_dir, args.temp_dir)
 
 
 def mask_tree(data, args):
     """Mask mono- and paraphyletic-tips that belong to the same taxon."""
     log.info('Masking tree tips for {}'.format(log_name(data['fasta'])))
 
-    data['masked'] = mask_tips(data['cleaned'], data['unrooted'], args)
+    data['masked'] = mask_tips(
+        data['cleaned'], data['unrooted'], args.output_dir,
+        args.mask_paraphyletic)
 
 
 def new_fasta(data, args):
@@ -114,7 +135,8 @@ def new_fasta(data, args):
     log.info('Converting masked tree to fasta for {}'.format(
         log_name(data['fasta'])))
 
-    data['fasta2'] = tree_to_fasta(data['fasta'], data['masked'], args)
+    data['fasta2'] = tree_to_fasta(
+        data['fasta'], data['masked'], args.output_dir)
 
 
 def log_name(path):
