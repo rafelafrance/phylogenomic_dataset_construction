@@ -2,8 +2,8 @@
 
 from os.path import basename, join, splitext
 from shutil import move
-import pylib.util as util
-import pylib.log as log
+from . import util
+from . import log
 
 
 def raxml_ng(fasta_file, args):

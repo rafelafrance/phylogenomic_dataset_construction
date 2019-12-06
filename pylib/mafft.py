@@ -1,9 +1,9 @@
 """Wrap mafft alignment tool."""
 
 from os.path import basename, join, splitext
-import pylib.util as util
-import pylib.log as log
-import pylib.bio as bio
+from . import util
+from . import log
+from . import bio
 
 
 MAX_ITERATE = 10_000

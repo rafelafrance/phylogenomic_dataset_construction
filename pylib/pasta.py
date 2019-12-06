@@ -2,9 +2,9 @@
 
 from os.path import abspath, basename, join, splitext
 from shutil import move
-import pylib.util as util
-import pylib.log as log
-import pylib.bio as bio
+from . import util
+from . import log
+from . import bio
 
 
 def pasta(fasta_file, args):

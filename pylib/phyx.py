@@ -2,9 +2,9 @@
 
 from os.path import basename, join, splitext
 from Bio.SeqIO.FastaIO import SimpleFastaParser
-import pylib.util as util
-import pylib.log as log
-import pylib.bio as bio
+from . import util
+from . import log
+from . import bio
 
 
 COLUMN_OCCUPANCY_SM = 0.1

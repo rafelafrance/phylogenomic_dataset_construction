@@ -24,15 +24,15 @@ def parse_args():
         version='%(prog)s v{}'.format(util.__VERSION__))
 
     parser.add_argument(
-        '-a', '--assemblies-dir', metavar='PATH', required=True,
-        help="""The path to the DNA contigs.""")
+        '-i', '--input-dir', metavar='PATH', required=True,
+        help="""The directory containing the input fasta files.""")
 
     parser.add_argument(
-        '-f', '--file-filter', default='*.fasta', metavar='FILTER',
-        help="""Use this to filter files in the assemblies directory. For
+        '-f', '--input-filter', default='*.fasta', metavar='FILTER',
+        help="""Use this to filter files in the input directory. For
             example '*filtered*.fasta' will select all fasta files in the
-            assemblies directory with the word filtered in them. The default
-            is to select all fasta files in the assemblies directory
+            input directory with the word filtered in them. The default
+            is to select all fasta files in the input directory
             '*.fasta'.""")
 
     cpus = min(10, os.cpu_count() - 4 if os.cpu_count() > 4 else 1)
@@ -64,16 +64,6 @@ def parse_args():
             current directory.""")
 
     parser.add_argument(
-        '--temp-dir', metavar='DIR',
-        help="""Place temporary files in this directory. All files will be
-            deleted after aTRAM completes. The directory must exist.""")
-
-    parser.add_argument(
-        '--keep-temp-dir', action='store_true',
-        help="""This flag will keep the temporary files in the --temp-dir
-            around for debugging.""")
-
-    parser.add_argument(
         '--anysymbol', action='store_true',
         help="""A mafft only option to handle when there are "U"s in aa
             sequences.""")
@@ -87,6 +77,16 @@ def parse_args():
         '--mask-paraphyletic', action='store_true',
         help="""When masking tree tips, do you want to also mask paraphyletic
             tips.""")
+
+    parser.add_argument(
+        '--temp-dir', metavar='DIR',
+        help="""Place temporary files in this directory. All files will be
+            deleted after aTRAM completes. The directory must exist.""")
+
+    parser.add_argument(
+        '--keep-temp-dir', action='store_true',
+        help="""This flag will keep the temporary files in the --temp-dir
+            around for debugging.""")
 
     args = parser.parse_args()
 

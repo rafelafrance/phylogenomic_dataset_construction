@@ -1,8 +1,8 @@
 """Wrapper for the treeshrink program."""
 
 from os.path import basename, join, splitext
-import pylib.util as util
-import pylib.log as log
+from . import util
+from . import log
 
 
 def treeshrink(tree_file, args):

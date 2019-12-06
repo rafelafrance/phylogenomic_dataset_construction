@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """Build homology trees."""
 
 from os.path import abspath, basename, join, splitext
@@ -48,7 +46,7 @@ def setup(args, temp_dir):
 def get_fasta_files(args):
     """Get the fasta data to process."""
     log.info('Gathering fasta files')
-    pattern = join(args.assemblies_dir, args.file_filter)
+    pattern = join(args.input_dir, args.input_filter)
     fasta_files = sorted([abspath(p) for p in glob(pattern)])
     if len(fasta_files) == 0:
         log.fatal('No data were found with this mask: "{}".'.format(pattern))

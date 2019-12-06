@@ -5,7 +5,7 @@ from os.path import basename, join, splitext
 from itertools import groupby
 from Bio import Phylo
 from pylib.util import taxon_id
-import pylib.bio as bio
+from . import bio
 
 
 IGNORE = re.compile(r'[x*?\-]', re.IGNORECASE)

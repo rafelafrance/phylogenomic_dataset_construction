@@ -1,7 +1,7 @@
 """Convert a Newick tree to a fasta file."""
 from os.path import basename, join, splitext
 from Bio import Phylo
-import pylib.bio as bio
+from . import bio
 
 
 def tree_to_fasta(old_fasta, tree_file, args):

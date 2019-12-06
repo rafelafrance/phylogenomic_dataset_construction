@@ -4,7 +4,7 @@ import sys
 import logging
 import tempfile
 import subprocess
-import pylib.util as util
+from . import util
 
 LOGGER = None  # Global logger so we can switch between processes
 FORMATTER = logging.Formatter(

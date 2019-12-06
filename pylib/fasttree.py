@@ -1,8 +1,8 @@
 """Wrap fasttree functions."""
 
 from os.path import basename, join, splitext
-import pylib.util as util
-import pylib.log as log
+from . import util
+from . import log
 
 
 def fasttree(fasta_file, args):
