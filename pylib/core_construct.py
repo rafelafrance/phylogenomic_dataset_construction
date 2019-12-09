@@ -2,7 +2,6 @@
 
 from os.path import abspath, basename, join, splitext
 from glob import glob
-from oldlib.mask_tips import mask_tips
 import pylib.util as util
 import pylib.bio as bio
 import pylib.log as log
@@ -13,6 +12,8 @@ from pylib.pasta import pasta
 from pylib.fasttree import fasttree
 from pylib.treeshrink import treeshrink
 from pylib.tree_to_fasta import tree_to_fasta
+from oldlib.mask_tips import mask_tips
+from oldlib.prune_paralogs_mi import prune_mi
 
 
 def pipeline(args):
@@ -24,13 +25,17 @@ def pipeline(args):
         setup(args, temp_dir)
 
         for data in get_fasta_files(args):
+            setattr(
+                args, 'log_name',
+                '"{}"'.format(splitext(basename(data['fasta']))[0]))
             try:
-                too_few_records(data)
+                too_few_records(data, args)
                 seq_too_long(data, args)
                 fasta_to_tree(data, args)
                 tree_shrink(data, args)
                 mask_tree(data, args)
                 new_fasta(data, args)
+                prune_paralogs(data, args)
 
             except util.StopProcessing:
                 pass
@@ -53,9 +58,9 @@ def get_fasta_files(args):
     return [{'fasta': f} for f in fasta_files]
 
 
-def too_few_records(data):
+def too_few_records(data, args):
     """Check if the fasta file is too small to make a good tree."""
-    log.info('Checking fasta for {}'.format(log_name(data['fasta'])))
+    log.info('Checking fasta for {}'.format(args.log_name))
 
     if bio.fasta_record_count(data['fasta']) < bio.MIN_SEQ:
         log.warn('"{}" has fewer than {} records, skipping.'.format(
@@ -77,8 +82,7 @@ def seq_too_long(data, args):
 
 def fasta_to_tree(data, args):
     """Build trees from the fasta data."""
-    log.info('Converting fasta to tree for {}'.format(
-        log_name(data['fasta'])))
+    log.info('Converting fasta to tree for {}'.format(args.log_name))
 
     if args.bootstrap:
         data['aligned'] = mafft(
@@ -114,7 +118,7 @@ def fasta_to_tree(data, args):
 
 def tree_shrink(data, args):
     """Remove long branches from trees."""
-    log.info('Shrinking tree for {}'.format(log_name(data['fasta'])))
+    log.info('Shrinking tree for {}'.format(args.log_name))
 
     data['trimmed'] = treeshrink(
         data['tree'], args.output_dir, args.temp_dir, args.quantiles)
@@ -123,7 +127,7 @@ def tree_shrink(data, args):
 
 def mask_tree(data, args):
     """Mask mono- and paraphyletic-tips that belong to the same taxon."""
-    log.info('Masking tree tips for {}'.format(log_name(data['fasta'])))
+    log.info('Masking tree tips for {}'.format(args.log_name))
 
     data['masked'] = mask_tips(
         data['cleaned'], data['unrooted'], args.output_dir,
@@ -132,13 +136,21 @@ def mask_tree(data, args):
 
 def new_fasta(data, args):
     """Mask mono- and paraphyletic-tips that belong to the same taxon."""
-    log.info('Converting masked tree to fasta for {}'.format(
-        log_name(data['fasta'])))
+    log.info('Converting masked tree to fasta for {}'.format(args.log_name))
 
     data['fasta2'] = tree_to_fasta(
         data['fasta'], data['masked'], args.output_dir)
 
 
-def log_name(path):
-    """Update the file path to something more readable for the logs."""
-    return '"{}"'.format(splitext(basename(path))[0])
+def prune_paralogs(data, args):
+    """Prune paralogs."""
+    log.info('Pruning paralogs for {}'.format(args.log_name))
+
+    if args.prune == 'mi':
+        pass
+    elif args.prune == 'mo':
+        pass
+    elif args.prune == 'rt':
+        pass
+    else:
+        pass
