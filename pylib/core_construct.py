@@ -147,7 +147,9 @@ def prune_paralogs(data, args):
     log.info('Pruning paralogs for {}'.format(args.log_name))
 
     if args.prune == 'mi':
-        pass
+        data['orthos'] = prune_mi(
+            data['masked'], args.output_dir, args.min_taxa,
+            args.relative_tip_cutoff, args.absolute_tip_cutoff)
     elif args.prune == 'mo':
         pass
     elif args.prune == 'rt':

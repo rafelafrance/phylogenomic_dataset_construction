@@ -9,16 +9,14 @@ This is to fix the leftover trees that frequently has some long tips in it
 If not to output 1-to-1 orthologs, for example, already analysed these
 set OUTPUT_1to1_ORTHOLOGS to False
 """
-import os
+from os.path import basename, join, splitext
+from shutil import copyfile
 from . import newick3
 from . import trim_tips
 from . import tree_utils
 
+
 OUTPUT_1to1_ORTHOLOGS = True
-
-
-def get_clusterID(filename):
-    return filename.split(".")[0]
 
 
 def get_front_score(node):
@@ -63,26 +61,29 @@ def prune(score_tuple, node, root, pp_trees):
         return newroot, False  # original root was cutoff, not done yet
 
 
-def prune_mi(tree_file, output_dir, min_taxa):
+def prune_mi(
+        tree_file, output_dir, min_taxa,
+        relative_tip_cutoff, absolute_tip_cutoff):
     with open(tree_file) as infile:  # only 1 tree in each file
         intree = newick3.parse(infile.readline())
     curroot = intree
-    pp_trees = []
 
-    if get_front_score(curroot) >= MIN_TAXA:  # No need to prune
+    output_files = []
+
+    if get_front_score(curroot) >= min_taxa:  # No need to prune
         print("No pruning needed")
         if OUTPUT_1to1_ORTHOLOGS:
-            os.system("cp " + inDIR + i + " " + outDIR + get_clusterID(
-                i) + "_1to1ortho.tre")
+            output_file = join(output_dir, splitext(basename(tree_file))[0])
+            output_file += '_1to1ortho.tre'
+            copyfile(tree_file, output_file)
+            output_files.append(output_file)
     else:  # scoring the tree
-        going = True
         pp_trees = []
 
-        while going:  # python version of do..while loop
+        while True:  # python version of do..while loop
             highest = 0
             highest_node = None
-            score_hashes = {}  # key is node, value is a tuple (
-            # front_score,back_score)
+            score_hashes = {}   # key: node, value: (front_score,back_score)
             for node in curroot.iternodes():
                 front_score = get_front_score(node)
                 back_score = get_back_score(node, curroot)
@@ -90,26 +91,29 @@ def prune_mi(tree_file, output_dir, min_taxa):
                 if front_score > highest or back_score > highest:
                     highest_node = node
                     highest = max(front_score, back_score)
-            if highest >= MIN_TAXA:  # prune
+            if highest >= min_taxa:  # prune
                 curroot, done = prune(
                     score_hashes[highest_node], highest_node,
                     curroot, pp_trees)
-                if done or len(curroot.leaves()) < MIN_TAXA:
-                    going = False
+                if done or len(curroot.leaves()) < min_taxa:
                     break
             else:
-                going = False
                 break
 
-        if len(pp_trees) > 0:
+        if len(pp_trees):
             count = 1
             for tree in pp_trees:
                 if tree.nchildren == 2:
                     node, tree = trim_tips.remove_kink(tree, tree)
                 tree = trim_tips.trim(tree, relative_tip_cutoff,
                                       absolute_tip_cutoff)
-                if tree is not None and len(tree.leaves()) >= MIN_TAXA:
-                    with open(outDIR + get_clusterID(i) + "_MIortho" + str(
-                            count) + ".tre", "w") as outfile:
+                if tree is not None and len(tree.leaves()) >= min_taxa:
+                    output_file = join(
+                        output_dir, splitext(basename(tree_file))[0])
+                    output_file += '_MIortho{}.tre'.format(count)
+                    output_files.append(output_file)
+                    with open(output_file, "w") as outfile:
                         outfile.write(newick3.tostring(tree) + ";\n")
                     count += 1
+
+    return output_files

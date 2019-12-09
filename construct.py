@@ -49,6 +49,11 @@ def parse_args():
             is to select all fasta files in the input directory
             '*.fasta'.""")
 
+    parser.add_argument(
+        '-o', '--output-dir', default='.',
+        help="""Place output files in this directory. The default is the
+            current directory.""")
+
     cpus = min(10, os.cpu_count() - 4 if os.cpu_count() > 4 else 1)
     parser.add_argument(
         '-c', '--cpus', '--processes', type=int, default=cpus,
@@ -73,11 +78,6 @@ def parse_args():
             results and helps with debugging the program.""")
 
     parser.add_argument(
-        '-o', '--output-dir', default='.',
-        help="""Place output files in this directory. The default is the
-            current directory.""")
-
-    parser.add_argument(
         '--anysymbol', action='store_true',
         help="""A mafft only option to handle when there are "U"s in aa
             sequences.""")
@@ -98,7 +98,7 @@ def parse_args():
             option means.""")
 
     parser.add_argument(
-        '-m', '--minimum-taxa', type=int, default=2,
+        '-m', '--min-taxa', type=int, default=2,
         help="""""")
 
     parser.add_argument(
