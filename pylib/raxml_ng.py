@@ -13,8 +13,7 @@ def raxml_ng(
         seq_type, cpus, seed):
     """Build a tree with raxml."""
     model = "Blosum62" if seq_type == "aa" else "GTR"
-    tree, _ = splitext(basename(fasta_file))
-    tree = tree + '.tre'
+    tree = splitext(basename(fasta_file))[0] + '.tre'
     cmd = ' '.join([
         'raxml-ng',
         '-T {}'.format(cpus),
@@ -38,8 +37,7 @@ def raxml_ng_bs(
         seq_type, cpus, seed, replicates=100):
     """Build a bootstrapped tree with raxml."""
     model = "Blosum62" if seq_type == "aa" else "GTR"
-    tree, _ = splitext(basename(fasta_file))
-    tree = tree + '.tre'
+    tree, _ = splitext(basename(fasta_file))[0] + '.tre'
     cmd = ' '.join([
         'raxml-ng',
         '-T {}'.format(cpus),

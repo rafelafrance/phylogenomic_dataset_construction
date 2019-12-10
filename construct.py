@@ -2,6 +2,7 @@
 
 """Build homology trees."""
 
+import re
 import sys
 import os
 from os.path import abspath, exists, expanduser
@@ -17,7 +18,7 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         allow_abbrev=True,
         fromfile_prefix_chars='@',
-        description=textwrap.dedent("""Phylogenomic dataset construction."""))
+        description=textwrap.dedent(util.__TITLE__))
 
     parser.add_argument(
         '--version', '-V', action='version',
@@ -76,6 +77,14 @@ def parse_args():
         help="""""")
 
     parser.add_argument(
+        '--min-occupancy', type=float, default=0.3,
+        help="""""")
+
+    parser.add_argument(
+        '--min-seq-len', type=int, default=10,
+        help="""""")
+
+    parser.add_argument(
         '--seed', type=int, default=12345,
         help="""A random number seed. This allows you to reproduce your
             results and helps with debugging the program.""")
@@ -108,14 +117,9 @@ def parse_args():
         help="""""")
 
     parser.add_argument(
-        '--in-groups',
-        help="""This is a comma separated list of in-groups used while pruning
-            trees. You may need to quote this argument.""")
-
-    parser.add_argument(
         '--out-groups',
         help="""This is a comma separated list of out-groups used while
-            pruning trees. You may need to quot this argument.""")
+            pruning trees. You may need to quote this argument.""")
 
     parser.add_argument(
         '--taxon-code-file', metavar='CODE-FILE',
@@ -143,16 +147,28 @@ def check_args(args):
     if args.temp_dir and not exists(args.temp_dir):
         sys.exit('The temporary directory must exist.')
 
-    if args.prune == 'mo' and (not args.in_groups or not args.out_groups):
-        sys.exit(util.shorten("""You must specify both in-groups and 
-            out-groups when --prune=mo."""))
+    if args.prune == 'mo' and not args.in_groups:
+        sys.exit(util.shorten("""You must specify out-groups
+            when --prune=mo."""))
 
     if args.prune == 'rt' and not args.taxon_code_file:
-        sys.exit(util.shorten("""You must specify a taxon code file with the 
+        sys.exit(util.shorten("""You must specify a taxon code file
             when --prune=rt."""))
+
+
+def parse_out_groups(args):
+    """Check all sequences are a member of an in- or out-group."""
+    if args.prune != 'mo':
+        return
+
+    args.out_groups = args.out_groups.strip(r'\'"')
+    args.out_groups = [g.strip() for g
+                       in re.split(r'\s*[\'",]+\s*', args.out_groups)]
+    args.out_groups = [g for g in args.out_groups if g]
 
 
 if __name__ == "__main__":
     ARGS = parse_args()
     check_args(ARGS)
+    parse_out_groups(ARGS)
     pipeline(ARGS)

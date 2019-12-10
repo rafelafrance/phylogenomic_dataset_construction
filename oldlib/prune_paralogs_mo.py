@@ -21,11 +21,10 @@ If not to output 1-to-1 orthologs, for example, already analysed these
 set OUTPUT_1TO1_ORTHOLOGS to False
 """
 
-from os.path import basename, join, splitext
 from shutil import copyfile
-import sys
 from . import phylo3
 from . import newick3
+from ..pylib import util
 
 
 OUTPUT_1TO1_ORTHOLOGS = True
@@ -189,7 +188,7 @@ def prune_paralogs_from_rerooted_homotree(root, out_groups):
     return root
 
 
-def prune_mo(tree_file, output_dir, min_taxa, in_groups, out_groups):
+def prune_mo(tree_file, output_dir, min_taxa, out_groups):
     output_files = []
 
     # read in the tree and check number of taxa
@@ -204,8 +203,8 @@ def prune_mo(tree_file, output_dir, min_taxa, in_groups, out_groups):
     # If the homolog has no taxon duplication, no cutting is needed
     if num_tips == num_taxa:
         if OUTPUT_1TO1_ORTHOLOGS:
-            output_file = join(output_dir, splitext(basename(tree_file))[0])
-            output_file += '_1to1ortho.tre'
+            output_file = util.file_name(
+                output_dir, tree_file, '_1to1ortho.tre')
             copyfile(tree_file, output_file)
             output_files.append(output_file)
     else:
@@ -229,17 +228,15 @@ def prune_mo(tree_file, output_dir, min_taxa, in_groups, out_groups):
             curroot = reroot_with_monophyletic_outgroups(curroot, out_groups)
             # only return one tree after pruning
             if curroot is not None:
-                output_file = join(
-                    output_dir, splitext(basename(tree_file))[0])
-                output_file += '.reroot'
+                output_file = util.file_name(output_dir, tree_file, '.reroot')
                 output_files.append(output_file)
                 with open(output_file, "w") as outfile:
                     outfile.write(newick3.tostring(curroot) + ";\n")
                 ortho = prune_paralogs_from_rerooted_homotree(
                     curroot, out_groups)
                 if len(set(get_front_names(curroot))) >= min_taxa:
-                    output_file = join(
-                        output_dir, splitext(basename(tree_file))[0])
+                    output_file = util.file_name(
+                        output_dir, tree_file, '.ortho.tre')
                     output_file += '.ortho.tre'
                     output_files.append(output_file)
                     with open(output_file, "w") as outfile:

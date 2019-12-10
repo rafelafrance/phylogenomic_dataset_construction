@@ -1,7 +1,7 @@
 """Misc. utilities and constants."""
 
 import os
-from os.path import expanduser
+from os.path import basename, expanduser, join, splitext
 from glob import glob
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -52,3 +52,11 @@ def remove_files(pattern):
 def taxon_id(header):
     """Split the name and return the taxon ID part."""
     return header.split('@')[0]
+
+
+def file_name(output_dir, path, suffix=None):
+    """Build the output file name."""
+    file_name = join(output_dir, splitext(basename(path))[0])
+    if suffix:
+        file_name += suffix
+    return file_name

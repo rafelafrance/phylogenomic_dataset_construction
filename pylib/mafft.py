@@ -2,7 +2,6 @@
 
 # pylint: disable=too-many-arguments
 
-from os.path import basename, join, splitext
 from . import util
 from . import log
 from . import bio
@@ -35,8 +34,7 @@ def mafft(fasta_file, output_dir, temp_dir, seq_type, cpus, anysymbol):
     cmd.append(in_path)
     cmd = ' '.join(cmd)
 
-    aligned = join(output_dir, splitext(basename(fasta_file))[0])
-    aligned += '.aln'
+    aligned = util.file_name(output_dir, fasta_file, '.aln')
 
     with util.cd(temp_dir):
         log.subcommand(cmd, out_path=aligned)

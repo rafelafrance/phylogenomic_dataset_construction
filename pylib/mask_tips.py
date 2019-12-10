@@ -1,11 +1,11 @@
 """Mask both mono- and paraphyletic tips that belong to the same taxon."""
 
 import re
-from os.path import basename, join, splitext
 from itertools import groupby
 from Bio import Phylo
 from pylib.util import taxon_id
 from . import bio
+from . import util
 
 
 IGNORE = re.compile(r'[x*?\-]', re.IGNORECASE)
@@ -23,7 +23,7 @@ def mask_tips(fasta_file, tree_file, output_dir):
     # if args.mask_paraphyletic:
     #     mask_paraphyletic_tips(tree, char_count)
 
-    output = join(output_dir, splitext(basename(tree_file))[0]) + '.mm'
+    output = util.file_name(output_dir, tree_file, '.mm')
     Phylo.write(tree, output, 'newick')
 
 

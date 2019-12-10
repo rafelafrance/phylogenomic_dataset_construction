@@ -8,10 +8,10 @@ IN  taxonID2
 OUT taxonID3
 """
 
-from os.path import basename, join, splitext
 import sys
 import oldlib.newick3 as newick3
 from . import tree_utils
+from ..pylib import util
 
 
 def prune_rt(tree_file, output_dir, min_taxa, taxon_code_file):
@@ -66,9 +66,8 @@ def prune_rt(tree_file, output_dir, min_taxa, taxon_code_file):
         inclade_count = 0
         for inclade in inclades:
             inclade_count += 1
-            output_file = join(
-                output_dir, splitext(basename(tree_file))[0])
-            output_file += '.inclade{}'.format(inclade_count)
+            output_file = util.file_name(
+                output_dir, tree_file, '.inclade{}'.format(inclade_count))
             output_files.append(output_file)
             with open(output_file, "w") as outfile:
                 outfile.write(newick3.tostring(inclade) + ";\n")
@@ -77,24 +76,23 @@ def prune_rt(tree_file, output_dir, min_taxa, taxon_code_file):
             for ortho in orthologs:
                 if len(tree_utils.get_front_labels(ortho)) >= min_taxa:
                     ortho_count += 1
-                    output_file = join(
-                        output_dir, splitext(basename(tree_file))[0])
-                    output_file += '.ortho{}.tre'.format(inclade_count)
+                    output_file = util.file_name(
+                        output_dir, tree_file,
+                        '.ortho{}.tre'.format(ortho_count))
                     output_files.append(output_file)
                     with open(output_file, "w") as outfile:
                         outfile.write(newick3.tostring(ortho) + ";\n")
 
     elif len(all_names) == num_taxa:
         # only output ortho tree when there is no taxon repeats
-        output_file = join(
-            output_dir, splitext(basename(tree_file))[0])
-        output_file += '.unrooted-ortho.tre'
+        output_file = util.file_name(
+            output_dir, tree_file, '.unrooted-ortho.tre')
         output_files.append(output_file)
         with open(output_file, "w") as outfile:
             outfile.write(newick3.tostring(curroot) + ";\n")
 
     else:  # do not attempt to infer direction of gene duplication
-        # without outgroup info
+        # without out-group info
         print("duplicated taxa in unrooted tree")
 
     return output_files

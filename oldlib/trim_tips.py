@@ -4,9 +4,7 @@ sister)
 Also trim any tips that are > absolute_cutoff
 """
 
-import os
-import oldlib.newick3 as newick3
-from .tree_utils import *
+from .tree_utils import remove_kink
 
 
 # return the outlier tip, with abnormal high contrast and long branch
@@ -81,32 +79,3 @@ def trim(curroot, relative_cutoff, absolute_cutoff):
                     if not keep_checking:
                         break
     return curroot
-
-
-def main(DIR, tree_file_ending, relative_cut, absolute_cut):
-    if DIR[-1] != "/":
-        DIR += "/"
-    filecount = 0
-    for i in os.listdir(DIR):
-        if i.endswith(tree_file_ending):
-            print(i)
-            filecount += 1
-            with open(DIR + i, "r") as infile:
-                intree = newick3.parse(infile.readline())
-            outtree = trim(intree, float(relative_cut), float(absolute_cut))
-            if outtree is not None:
-                with open(DIR + i + ".tt", "w") as outfile:
-                    outfile.write(newick3.tostring(outtree) + ";\n")
-    assert filecount > 0, \
-        "No file end with " + tree_file_ending + " found in " + DIR
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print(
-            "python trim_tips.py DIR tree_file_ending relative_cutoff "
-            "absolute_cutoff")
-        sys.exit(0)
-
-    DIR, tree_file_ending, relative_cut, absolute_cut = sys.argv[1:]
-    main(DIR, tree_file_ending, relative_cut, absolute_cut)

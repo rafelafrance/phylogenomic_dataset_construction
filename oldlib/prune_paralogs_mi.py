@@ -9,11 +9,12 @@ This is to fix the leftover trees that frequently has some long tips in it
 If not to output 1-to-1 orthologs, for example, already analysed these
 set OUTPUT_1to1_ORTHOLOGS to False
 """
-from os.path import basename, join, splitext
+
 from shutil import copyfile
 from . import newick3
 from . import trim_tips
 from . import tree_utils
+from ..pylib import util
 
 
 OUTPUT_1to1_ORTHOLOGS = True
@@ -72,8 +73,8 @@ def prune_mi(
     if get_front_score(curroot) >= min_taxa:  # No need to prune
         print("No pruning needed")
         if OUTPUT_1to1_ORTHOLOGS:
-            output_file = join(output_dir, splitext(basename(tree_file))[0])
-            output_file += '_1to1ortho.tre'
+            output_file = util.file_name(
+                output_dir, tree_file, '_1to1ortho.tre')
             copyfile(tree_file, output_file)
             output_files.append(output_file)
     else:  # scoring the tree
@@ -103,13 +104,12 @@ def prune_mi(
             count = 1
             for tree in pp_trees:
                 if tree.nchildren == 2:
-                    node, tree = trim_tips.remove_kink(tree, tree)
+                    node, tree = tree_utils.remove_kink(tree, tree)
                 tree = trim_tips.trim(tree, relative_tip_cutoff,
                                       absolute_tip_cutoff)
                 if tree is not None and len(tree.leaves()) >= min_taxa:
-                    output_file = join(
-                        output_dir, splitext(basename(tree_file))[0])
-                    output_file += '_MIortho{}.tre'.format(count)
+                    output_file = util.file_name(
+                        output_dir, tree_file, '_MIortho{}.tre'.format(count))
                     output_files.append(output_file)
                     with open(output_file, "w") as outfile:
                         outfile.write(newick3.tostring(tree) + ";\n")

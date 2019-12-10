@@ -1,6 +1,5 @@
 """Build homology trees."""
 
-import re
 from os.path import abspath, basename, join, splitext
 from glob import glob
 import pylib.util as util
@@ -8,11 +7,11 @@ import pylib.bio as bio
 import pylib.log as log
 from pylib.mafft import mafft
 from pylib.raxml import raxml, raxml_bs
-from pylib.phyx import pxclsq, pxrr, COLUMN_OCCUPANCY_LG, COLUMN_OCCUPANCY_SM
+from pylib.phyx import pxclsq, pxrr
 from pylib.pasta import pasta
 from pylib.fasttree import fasttree
 from pylib.treeshrink import treeshrink
-from pylib.tree_to_fasta import tree_to_fasta
+from pylib.tree_to_fasta import tree_to_fasta, ortholog_to_fasta
 from oldlib.mask_tips import mask_tips
 from oldlib.prune_paralogs_mi import prune_mi
 from oldlib.prune_paralogs_mo import prune_mo
@@ -35,12 +34,12 @@ def pipeline(args):
             try:
                 too_few_records(data, args)
                 seq_too_long(data, args)
-                check_in_out_groups(data, args)
                 fasta_to_tree(data, args)
                 tree_shrink(data, args)
                 mask_tree(data, args)
                 new_fasta(data, args)
                 prune_paralogs(data, args)
+                orthologs_to_fasta(data, args)
 
             except util.StopProcessing:
                 pass
@@ -51,6 +50,7 @@ def setup(args, temp_dir):
     args.temp_dir = temp_dir  # Put the real temp dir into the args
     log_file = join(args.output_dir, 'build_homology_trees.log')
     log.setup(log_file)
+    setattr(args, 'groups_processed', False)
 
 
 def get_fasta_files(args):
@@ -85,26 +85,6 @@ def seq_too_long(data, args):
             """.format(data['fasta'], seq_count, longest)))
 
 
-def check_in_out_groups(data, args):
-    """Check all sequences are a member of an in- or out-group."""
-    if args.prune != 'mo':
-        return
-    if not isinstance(args.in_groups, list):
-        args.in_groups = args.in_groups.strip(r'\'"')
-        args.out_groups = args.out_groups.strip(r'\'"')
-        args.in_groups = [g.strip() for g
-                          in re.split(r'\s*[\'",]+\s*', args.in_groups)]
-        args.out_groups = [g.strip() for g
-                           in re.split(r'\s*[\'",]+\s*', args.out_groups)]
-        args.in_groups = [g for g in args.in_groups if g]
-        args.out_groups = [g for g in args.out_groups if g]
-    names = {n.split('@')[0] for n in bio.read_fasta(data['fasta']).keys()}
-    errors = [n for n in names if n not in args.in_groups + args.out_groups]
-    if errors:
-        log.fatal('The following taxon IDs are not in an in-group or '
-                  'out-group: {}'.format(', '.join(sorted(errors))))
-
-
 def fasta_to_tree(data, args):
     """Build trees from the fasta data."""
     log.info('Converting fasta to tree for {}'.format(args.log_name))
@@ -115,7 +95,7 @@ def fasta_to_tree(data, args):
             args.seq_type, args.cpus, args.anysymbol)
         data['cleaned'] = pxclsq(
             data['aligned'], args.output_dir, args.temp_dir,
-            args.seq_type, COLUMN_OCCUPANCY_LG)
+            args.seq_type, args.min_occupancy, args.min_seq_len)
         data['tree'] = raxml_bs(
             data['cleaned'], args.output_dir, args.temp_dir,
             args.seq_type, args.cpus, args.seed)
@@ -125,7 +105,7 @@ def fasta_to_tree(data, args):
             data['fasta'], args.output_dir, args.temp_dir, args.seq_type)
         data['cleaned'] = pxclsq(
             data['aligned'], args.output_dir, args.temp_dir,
-            args.seq_type, COLUMN_OCCUPANCY_SM)
+            args.seq_type, args.min_occupancy, args.min_seq_len)
         data['tree'] = fasttree(
             data['cleaned'], args.output_dir, args.temp_dir, args.seq_type)
 
@@ -135,7 +115,7 @@ def fasta_to_tree(data, args):
             args.seq_type, args.cpus, args.anysymbol)
         data['cleaned'] = pxclsq(
             data['aligned'], args.output_dir, args.temp_dir,
-            args.seq_type, COLUMN_OCCUPANCY_SM)
+            args.seq_type, args.min_occupancy, args.min_seq_len)
         data['tree'] = raxml(
             data['cleaned'], args.output_dir, args.temp_dir,
             args.seq_type, args.cpus, args.seed)
@@ -177,8 +157,7 @@ def prune_paralogs(data, args):
             args.relative_tip_cutoff, args.absolute_tip_cutoff)
     elif args.prune == 'mo':
         data['orthos'] = prune_mo(
-            data['masked'], args.output_dir, args.min_taxa,
-            args.in_groups, args.out_groups)
+            data['masked'], args.output_dir, args.min_taxa, args.out_groups)
     elif args.prune == 'rt':
         data['orthos'] = prune_rt(
             data['masked'], args.output_dir, args.min_taxa,
@@ -186,3 +165,13 @@ def prune_paralogs(data, args):
     else:
         data['orthos'] = prune_1to1(
             data['masked'], args.output_dir, args.min_taxa)
+
+
+def orthologs_to_fasta(data, args):
+    """Write ortholog trees to fasta files."""
+    data['ortho_fa'] = []
+    for tree_file in data['orthos']:
+        fasta = ortholog_to_fasta(
+            data['fasta2'], tree_file, args.output_dir, args.min_taxa)
+        if fasta:
+            data['ortho_fa'].append_(fasta)

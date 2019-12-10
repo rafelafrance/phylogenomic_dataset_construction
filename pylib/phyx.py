@@ -2,24 +2,20 @@
 
 # pylint: disable=too-many-arguments
 
-from os.path import basename, join, splitext
+from os.path import basename
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 from . import util
 from . import log
 from . import bio
 
 
-COLUMN_OCCUPANCY_SM = 0.1
-COLUMN_OCCUPANCY_LG = 0.2
 MIN_LEN = 10
 
 
 def pxclsq(
-        fasta_file, output_dir, temp_dir, seq_type, min_occupancy,
-        min_len=MIN_LEN):
+        fasta_file, output_dir, temp_dir, seq_type, min_occupancy, min_len):
     """Filter aligned sequences for occupancy and length."""
-    temp_cleaned = join(temp_dir, splitext(basename(fasta_file))[0])
-    temp_cleaned += '_cleaned.fasta'
+    temp_cleaned = util.file_name(output_dir, fasta_file, '_cleaned.fasta')
 
     cmd = ' '.join([
         'pxclsq',
@@ -31,8 +27,7 @@ def pxclsq(
     with util.cd(temp_dir):
         log.subcommand(cmd)
 
-    cleaned = join(output_dir, splitext(basename(fasta_file))[0])
-    cleaned += '.cln'
+    cleaned = util.file_name(output_dir, fasta_file, '.cln')
 
     with open(temp_cleaned) as in_file, open(cleaned, 'w') as out_file:
         for header, seq in SimpleFastaParser(in_file):
@@ -44,7 +39,7 @@ def pxclsq(
 
 def pxrr(tree_file, output_dir, temp_dir):
     """Unroot the tree returned by treeshrink."""
-    unrooted = join(output_dir, splitext(basename(tree_file))[0] + '.tt')
+    unrooted = util.file_name(output_dir, tree_file, '.tt')
     cmd = ' '.join([
         'pxrr',
         '--unroot',

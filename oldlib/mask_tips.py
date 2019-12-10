@@ -6,10 +6,10 @@ trimmed alignment
 """
 
 import re
-from os.path import basename, join, splitext
 import pylib.bio as bio
 import oldlib.newick3 as newick3
 from .tree_utils import get_name, remove_kink
+from ..pylib import util
 
 
 IGNORE = re.compile(r'[x*?\-]', re.IGNORECASE)
@@ -23,7 +23,7 @@ def mask_tips(fasta_file, tree_file, output_dir, mask_paraphyletic):
     chars = {k: len(IGNORE.sub('', v))
              for k, v in bio.read_fasta(fasta_file).items()}
 
-    output = join(output_dir, splitext(basename(tree_file))[0]) + '.mm'
+    output = util.file_name(output_dir, tree_file, '.mm')
 
     root = mask_monophyletic_tips(in_tree, chars)
 

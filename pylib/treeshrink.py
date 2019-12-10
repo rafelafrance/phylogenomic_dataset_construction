@@ -1,13 +1,13 @@
 """Wrapper for the treeshrink program."""
 
-from os.path import basename, join, splitext
+from os.path import basename, join
 from . import util
 from . import log
 
 
 def treeshrink(tree_file, output_dir, temp_dir, quantiles):
     """Remove long branches from a tree."""
-    subdir = join(temp_dir, splitext(basename(tree_file))[0])
+    subdir = util.file_name(output_dir, tree_file)
 
     cmd = ' '.join([
         'run_treeshrink.py',
@@ -22,7 +22,7 @@ def treeshrink(tree_file, output_dir, temp_dir, quantiles):
         log.subcommand(cmd)
 
     tree_src = join(subdir, tree_file)
-    tree_dst = join(output_dir, splitext(tree_file)[0] + '.ts')
+    tree_dst = util.file_name(output_dir, tree_file, '.ts')
 
     with open(tree_src) as in_file, open(tree_dst, 'w') as out_file:
         content = in_file.read()

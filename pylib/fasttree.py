@@ -12,8 +12,7 @@ def fasttree(fasta_file, output_dir, temp_dir, seq_type):
     cmd.append(fasta_file)
     cmd = ' '.join(cmd)
 
-    tree_file = join(output_dir, splitext(basename(fasta_file))[0])
-    tree_file += '.aligned'
+    tree_file = util.file_name(output_dir, fasta_file, '.aligned')
 
     with util.cd(temp_dir):
         log.subcommand(cmd, out_path=tree_file)

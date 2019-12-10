@@ -11,8 +11,7 @@ from . import log
 def raxml(fasta_file, output_dir, temp_dir, seq_type, cpus, seed):
     """Build a tree with raxml."""
     model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
-    tree, _ = splitext(basename(fasta_file))
-    tree = tree + '.tre'
+    tree = splitext(basename(fasta_file))[0] + '.tre'
     cmd = ' '.join([
         'raxml',
         '-T {}'.format(cpus),
@@ -36,8 +35,7 @@ def raxml_bs(
         replicates=100):
     """Build a bootstrapped tree with raxml."""
     model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
-    tree, _ = splitext(basename(fasta_file))
-    tree = tree + '.tre'
+    tree = splitext(basename(fasta_file))[0] + '.tre'
     cmd = ' '.join([
         'raxml',
         '-T {}'.format(cpus),
