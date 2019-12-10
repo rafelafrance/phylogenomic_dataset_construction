@@ -212,10 +212,6 @@ def prune_mo(tree_file, output_dir, min_taxa, in_groups, out_groups):
         # now need to deal with taxon duplications
         # check to make sure that the ingroup and outgroup names were
         # set correctly
-        for name in names:
-            if name not in in_groups and name not in out_groups:
-                print("check name", name)
-                sys.exit()
         outgroup_names = get_front_outgroup_names(curroot, out_groups)
 
         # if no out-group at all, do not resolve gene duplication

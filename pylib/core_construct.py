@@ -1,5 +1,6 @@
 """Build homology trees."""
 
+import re
 from os.path import abspath, basename, join, splitext
 from glob import glob
 import pylib.util as util
@@ -34,6 +35,7 @@ def pipeline(args):
             try:
                 too_few_records(data, args)
                 seq_too_long(data, args)
+                check_in_out_groups(data, args)
                 fasta_to_tree(data, args)
                 tree_shrink(data, args)
                 mask_tree(data, args)
@@ -81,6 +83,26 @@ def seq_too_long(data, args):
             The longest is {} characters.
             This is too long and may crash the alignment process.
             """.format(data['fasta'], seq_count, longest)))
+
+
+def check_in_out_groups(data, args):
+    """Check all sequences are a member of an in- or out-group."""
+    if args.prune != 'mo':
+        return
+    if not isinstance(args.in_groups, list):
+        args.in_groups = args.in_groups.strip(r'\'"')
+        args.out_groups = args.out_groups.strip(r'\'"')
+        args.in_groups = [g.strip() for g
+                          in re.split(r'\s*[\'",]+\s*', args.in_groups)]
+        args.out_groups = [g.strip() for g
+                           in re.split(r'\s*[\'",]+\s*', args.out_groups)]
+        args.in_groups = [g for g in args.in_groups if g]
+        args.out_groups = [g for g in args.out_groups if g]
+    names = {n.split('@')[0] for n in bio.read_fasta(data['fasta']).keys()}
+    errors = [n for n in names if n not in args.in_groups + args.out_groups]
+    if errors:
+        log.fatal('The following taxon IDs are not in an in-group or '
+                  'out-group: {}'.format(', '.join(sorted(errors))))
 
 
 def fasta_to_tree(data, args):
