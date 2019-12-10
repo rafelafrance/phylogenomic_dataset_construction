@@ -2,36 +2,22 @@
 
 """Build homology trees."""
 
+import sys
 import os
-from os.path import abspath, expanduser
+from os.path import abspath, exists, expanduser
 import argparse
 import textwrap
-import pylib.util as util
+from pylib import util
 from pylib.core_construct import pipeline
 
 
 def parse_args():
     """Process command-line arguments."""
-    # python scripts/prune_paralogs_MI.py data/locus_001/fasta/ tt 0.02
-    # 0.02 2 data/locus_001/
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         allow_abbrev=True,
         fromfile_prefix_chars='@',
-        description=textwrap.dedent("""Phylogenomic dataset construction."""),
-        epilog=textwrap.dedent("""
-            Pruning options (--prune)
-            -------------------------
-              1to1: Only look at homologs that are strictly one-to-one.
-                    No cutting is carried out.
-              mi:   Prune by using homologs with monophyletic, non-repeating
-                    out-groups, reroot and cut paralog from root to tip.
-              mo:   Prune by using homologs with monophyletic, non-repeating
-                    out-groups reroot and cut paralog from root to tip.
-              rt:   rune by extracting in-group clades and then cut paralogs
-                    from root to tip. If no out-group, only use those that do
-                    not have duplicated taxa.
-            """))
+        description=textwrap.dedent("""Phylogenomic dataset construction."""))
 
     parser.add_argument(
         '--version', '-V', action='version',
@@ -54,13 +40,18 @@ def parse_args():
         help="""Place output files in this directory. The default is the
             current directory.""")
 
-    cpus = min(10, os.cpu_count() - 4 if os.cpu_count() > 4 else 1)
     parser.add_argument(
-        '-c', '--cpus', '--processes', type=int, default=cpus,
-        help="""Number of CPU processors to use. This is passed to wrapped
-            programs that use this option like: mafft.
-            The default will use {} out of {} CPUs.
-            """.format(cpus, os.cpu_count()))
+        '-p', '--prune', choices=['1to1', 'mi', 'mo', 'rt'], required=True,
+        help="""How will you prune the input trees.
+              "1to1" = Only look at homologs that are strictly one-to-one.
+                       No cutting is carried out.
+              "mi" = Prune by using homologs with monophyletic, non-repeating
+                     out-groups, reroot and cut paralog from root to tip.
+              "mo" = Prune by using homologs with monophyletic, non-repeating
+                     out-groups reroot and cut paralog from root to tip.
+              "rt" = Prune by extracting in-group clades and then cut paralogs
+                     from root to tip. If no out-group, only use those that do
+                     not have duplicated taxa.""")
 
     parser.add_argument(
         '-t', '--seq-type', default='dna',
@@ -68,12 +59,24 @@ def parse_args():
         help="""Are we building trees from DNA or amino acid sequences. The
             default is "dna".""")
 
+    cpus = min(10, os.cpu_count() - 4 if os.cpu_count() > 4 else 1)
     parser.add_argument(
-        '-b', '--bootstrap', action='store_true',
+        '--cpus', '--processes', type=int, default=cpus,
+        help="""Number of CPU processors to use. This is passed to wrapped
+            programs that use this option like: mafft.
+            The default will use {} out of {} CPUs.
+            """.format(cpus, os.cpu_count()))
+
+    parser.add_argument(
+        '--bootstrap', action='store_true',
         help="""Turn on rapid bootstrapping.""")
 
     parser.add_argument(
-        '-s', '--seed', type=int, default=12345,
+        '--min-taxa', type=int, default=2,
+        help="""""")
+
+    parser.add_argument(
+        '--seed', type=int, default=12345,
         help="""A random number seed. This allows you to reproduce your
             results and helps with debugging the program.""")
 
@@ -83,7 +86,7 @@ def parse_args():
             sequences.""")
 
     parser.add_argument(
-        '-q', '--quantiles', type=float, default=0.05,
+        '--quantiles', type=float, default=0.05,
         help="""A TreeShrink only option for tree trimming quantiles. The
             default is 0.05.""")
 
@@ -93,21 +96,30 @@ def parse_args():
             tips.""")
 
     parser.add_argument(
-        '-p', '--prune', choices=['1to1', 'mi', 'mo', 'rt'], required=True,
-        help="""How will you prune the input trees. See below for what each
-            option means.""")
-
-    parser.add_argument(
-        '-m', '--min-taxa', type=int, default=2,
+        '--min-bootstrap', type=float, default=0.0,
         help="""""")
 
     parser.add_argument(
-        '-a', '--absolute-tip-cutoff', type=float, default=0.02,
+        '--absolute-tip-cutoff', type=float, default=0.02,
         help="""""")
 
     parser.add_argument(
-        '-r', '--relative-tip-cutoff', type=float, default=0.02,
+        '--relative-tip-cutoff', type=float, default=0.02,
         help="""""")
+
+    parser.add_argument(
+        '--in-groups',
+        help="""This is a comma separated list of in-groups used while pruning
+            trees. You may need to quote this argument.""")
+
+    parser.add_argument(
+        '--out-groups',
+        help="""This is a comma separated list of out-groups used while
+            pruning trees. You may need to quot this argument.""")
+
+    parser.add_argument(
+        '--taxon-code-file', metavar='CODE-FILE',
+        help="""Path to the taxon code file.""")
 
     parser.add_argument(
         '--temp-dir', metavar='DIR',
@@ -122,11 +134,25 @@ def parse_args():
     args = parser.parse_args()
 
     args.output_dir = abspath(expanduser(args.output_dir))
-    util.temp_dir_exists(args.temp_dir)
 
     return args
 
 
+def check_args(args):
+    """Check arguments are consistent."""
+    if args.temp_dir and not exists(args.temp_dir):
+        sys.exit('The temporary directory must exist.')
+
+    if args.prune == 'mo' and (not args.in_groups or not args.out_groups):
+        sys.exit(util.shorten("""You must specify both in-groups and 
+            out-groups when --prune=mo."""))
+
+    if args.prune == 'rt' and not args.taxon_code_file:
+        sys.exit(util.shorten("""You must specify a taxon code file with the 
+            when --prune=rt."""))
+
+
 if __name__ == "__main__":
     ARGS = parse_args()
+    check_args(ARGS)
     pipeline(ARGS)

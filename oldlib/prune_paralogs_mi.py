@@ -22,7 +22,7 @@ OUTPUT_1to1_ORTHOLOGS = True
 def get_front_score(node):
     front_labels = tree_utils.get_front_labels(node)
     num_labels = len(front_labels)
-    num_taxa = len(set([tree_utils.get_name(i) for i in front_labels]))
+    num_taxa = len(set(tree_utils.get_name(i) for i in front_labels))
     if num_taxa == num_labels:
         return num_taxa
     return -1
@@ -31,7 +31,7 @@ def get_front_score(node):
 def get_back_score(node, root):
     back_labels = tree_utils.get_back_labels(node, root)
     num_labels = len(back_labels)
-    num_taxa = len(set([tree_utils.get_name(i) for i in back_labels]))
+    num_taxa = len(set(tree_utils.get_name(i) for i in back_labels))
     if num_taxa == num_labels:
         return num_taxa
     return -1
@@ -45,30 +45,29 @@ def prune(score_tuple, node, root, pp_trees):
         if par is not None and len(root.leaves()) >= 3:
             par, root = tree_utils.remove_kink(par, root)
         return root, node == root
+    if node != root:  # prune back
+        par = node.parent  # par--node<
+        par.remove_child(node)
+        if par.parent is not None:
+            par, root = tree_utils.remove_kink(par, root)
+    node.prune()
+    print("prune back")
+    pp_trees.append(root)
+    if len(node.leaves()) >= 3:
+        node, newroot = tree_utils.remove_kink(node, node)
     else:
-        if node != root:  # prune back
-            par = node.parent  # par--node<
-            par.remove_child(node)
-            if par.parent is not None:
-                par, root = tree_utils.remove_kink(par, root)
-        node.prune()
-        print("prune back")
-        pp_trees.append(root)
-        if len(node.leaves()) >= 3:
-            node, newroot = tree_utils.remove_kink(node, node)
-        else:
-            newroot = node
-        return newroot, False  # original root was cutoff, not done yet
+        newroot = node
+    return newroot, False  # original root was cutoff, not done yet
 
 
 def prune_mi(
         tree_file, output_dir, min_taxa,
         relative_tip_cutoff, absolute_tip_cutoff):
+    output_files = []
+
     with open(tree_file) as infile:  # only 1 tree in each file
         intree = newick3.parse(infile.readline())
     curroot = intree
-
-    output_files = []
 
     if get_front_score(curroot) >= min_taxa:  # No need to prune
         print("No pruning needed")
@@ -100,7 +99,7 @@ def prune_mi(
             else:
                 break
 
-        if len(pp_trees):
+        if len(pp_trees) > 0:
             count = 1
             for tree in pp_trees:
                 if tree.nchildren == 2:

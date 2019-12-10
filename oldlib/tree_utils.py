@@ -25,15 +25,15 @@ def get_back_labels(node, root):
 
 
 def get_front_names(node):
-    """given a node, return a list of front tip taxonIDs
-    list may contain identical taxonIDs"""
+    """given a node, return a list of front tip taxon IDs
+    list may contain identical taxon IDs"""
     labels = get_front_labels(node)
     return [get_name(i) for i in labels]
 
 
 def get_back_names(node, root):
     """given a node, return a list of back tip taxonIDs
-    list may contain identical taxonIDs"""
+    list may contain identical taxon IDs"""
     back_labels = get_back_labels(node, root)
     return [get_name(i) for i in back_labels]
 
@@ -140,7 +140,7 @@ def extract_rooted_ingroup_clades(root, ingroups, outgroups, min_ingroup_taxa):
                 if name in outgroups:
                     front = -1
                     break
-                elif name in ingroups:
+                if name in ingroups:
                     front += 1
                 else:
                     sys.exit("Check taxonID " + name)
@@ -149,7 +149,7 @@ def extract_rooted_ingroup_clades(root, ingroups, outgroups, min_ingroup_taxa):
                 if name in outgroups:
                     back = -1
                     break
-                elif name in ingroups:
+                if name in ingroups:
                     back += 1
                 else:
                     sys.exit("Check taxonID " + name)
@@ -163,7 +163,7 @@ def extract_rooted_ingroup_clades(root, ingroups, outgroups, min_ingroup_taxa):
                 inclades.append(max_node)
                 kink = max_node.prune()
                 if len(root.leaves()) > 3:
-                    newnode, root = remove_kink(kink, root)
+                    _, root = remove_kink(kink, root)
                 else:
                     break
             elif direction == "back":

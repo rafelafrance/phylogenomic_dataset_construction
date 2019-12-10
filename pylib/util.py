@@ -1,15 +1,14 @@
 """Misc. utilities and constants."""
 
-import sys
 import os
-from os.path import expanduser, exists
+from os.path import expanduser
 from glob import glob
 from shutil import rmtree
 from tempfile import mkdtemp
 from contextlib import contextmanager
 
 
-__VERSION__ = '2.0.0'
+__VERSION__ = '0.0.1'
 __TITLE__ = 'Phylogenomic Dataset Construction'
 
 
@@ -20,12 +19,6 @@ class StopProcessing(Exception):
 def shorten(text):
     """Collapse whitespace in a string."""
     return ' '.join(text.split())
-
-
-def temp_dir_exists(temp_dir):
-    """Make sure the temporary directory exits."""
-    if temp_dir and not exists(temp_dir):
-        sys.exit('The temporary directory must exist.')
 
 
 @contextmanager

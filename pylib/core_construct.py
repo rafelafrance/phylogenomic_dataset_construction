@@ -14,6 +14,9 @@ from pylib.treeshrink import treeshrink
 from pylib.tree_to_fasta import tree_to_fasta
 from oldlib.mask_tips import mask_tips
 from oldlib.prune_paralogs_mi import prune_mi
+from oldlib.prune_paralogs_mo import prune_mo
+from oldlib.prune_paralogs_rt import prune_rt
+from oldlib.prune_orthologs_1to1 import prune_1to1
 
 
 def pipeline(args):
@@ -151,8 +154,13 @@ def prune_paralogs(data, args):
             data['masked'], args.output_dir, args.min_taxa,
             args.relative_tip_cutoff, args.absolute_tip_cutoff)
     elif args.prune == 'mo':
-        pass
+        data['orthos'] = prune_mo(
+            data['masked'], args.output_dir, args.min_taxa,
+            args.in_groups, args.out_groups)
     elif args.prune == 'rt':
-        pass
+        data['orthos'] = prune_rt(
+            data['masked'], args.output_dir, args.min_taxa,
+            args.taxon_code_file)
     else:
-        pass
+        data['orthos'] = prune_1to1(
+            data['masked'], args.output_dir, args.min_taxa)
