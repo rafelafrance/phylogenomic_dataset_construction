@@ -12,8 +12,8 @@ from pylib import util
 from pylib.steps.check import check
 from pylib.steps.fa2tree import fa2tree
 from pylib.steps.shrink import shrink
-from pylib.steps.mask import mask_tree
-from pylib.steps.tree2fa import new_fasta
+from pylib.steps.mask import mask
+from pylib.steps.tree2fa import tree2fa
 from pylib.steps.prune import prune_paralogs
 from pylib.steps.orth2fa import orthologs_to_fasta
 
@@ -75,7 +75,8 @@ def check_step(subparsers):
             fasta files. Are there too few fasta records in the file to make
             a tree? Or are there really long sequences that may crash the
             alignment process?"""))
-    input_args(check_parser, '*.fasta')
+    input_dir(check_parser)
+    input_filter(check_parser, '*.fasta')
     seq_type_arg(check_parser)
     check_parser.set_defaults(func=check)
 
@@ -125,14 +126,21 @@ def mask_step(subparsers):
     mask_parser = subparsers.add_parser(
         'mask', help=helper("""Mask both mono- and (optional) paraphyletic
             tips that belong to the same taxon."""))
-    mask_parser.set_defaults(func=mask_tree)
+    input_dir(mask_parser)
+    input_filter(mask_parser, '*.cln', long='--clean-filter', short='-c')
+    input_filter(mask_parser, '*.ts', long='--tree-filter', short='-t')
+    # mask_parser.add_argument(
+    #     '--mask-paraphyletic', action='store_true',
+    #     help="""When masking tree tips, do you want to also mask paraphyletic
+    #         tips.""")
+    mask_parser.set_defaults(func=mask)
 
 
 def tree2fa_step(subparsers):
     """Add tree2fa step."""
     tree2fa_parser = subparsers.add_parser(
         'tree2fa', help=helper(""""""))
-    tree2fa_parser.set_defaults(func=new_fasta)
+    tree2fa_parser.set_defaults(func=tree2fa)
 
 
 def prune_step(subparsers):
@@ -158,22 +166,26 @@ def helper(msg):
 
 def io_args(parser, default_filter, default_ext):
     """Add input and output file args to the parser."""
-    input_args(parser, default_filter)
+    input_dir(parser)
+    input_filter(parser, default_filter)
     output_args(parser, default_ext)
 
 
-def input_args(parser, default_filter):
-    """Add input file args to the parser."""
+def input_dir(parser):
+    """Add input directory arg."""
     parser.add_argument(
         '-i', '--input-dir', metavar='PATH', required=True,
-        help="""The directory containing the input fasta files.""")
+        help="""The directory containing the input files.""")
 
+
+def input_filter(parser, default_filter, long='--input-filter', short='-f'):
+    """Add input filter arg."""
     parser.add_argument(
-        '-f', '--input-filter', default=default_filter, metavar='FILTER',
+        short, long, default=default_filter, metavar='FILTER',
         help="""Use this to filter files in the input directory. For
-            example '*filtered*.fasta' will select all fasta files in the
-            input directory with the word filtered in them. The default
-            is '{}'.""".format(default_filter))
+            example '*filtered*{0}' will select all "{0}" files in the
+            input directory with the word "filtered" in them. The default
+            is '{0}'.""".format(default_filter))
 
 
 def output_args(parser, default_ext):
@@ -185,8 +197,8 @@ def output_args(parser, default_ext):
 
     parser.add_argument(
         '-e', '--output-extension', metavar='EXT', default=default_ext,
-        help="""The file extention to use for the output files. The default is
-        '{}'.""".format(default_ext))
+        help="""The file extention to use for the output files. 
+            The default is '{}'.""".format(default_ext))
 
 
 def seq_type_arg(parser):
@@ -228,11 +240,6 @@ def other_args(parser):
         help="""""")
 
     parser.add_argument(
-        '--mask-paraphyletic', action='store_true',
-        help="""When masking tree tips, do you want to also mask paraphyletic
-            tips.""")
-
-    parser.add_argument(
         '--min-bootstrap', type=float, default=0.0,
         help="""""")
 
@@ -252,6 +259,16 @@ def other_args(parser):
     parser.add_argument(
         '--taxon-code-file', metavar='CODE-FILE',
         help="""Path to the taxon code file.""")
+
+    parser.add_argument(
+        '--temp-dir', metavar='DIR',
+        help="""Place temporary files in this directory. All files will be
+            deleted after aTRAM completes. The directory must exist.""")
+
+    parser.add_argument(
+        '--keep-temp-dir', action='store_true',
+        help="""This flag will keep the temporary files in the --temp-dir
+            around for debugging.""")
 
     args = parser.parse_args()
 

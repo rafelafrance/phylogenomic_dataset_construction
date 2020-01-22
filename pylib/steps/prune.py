@@ -19,7 +19,7 @@ import pylib.bio as bio
 
 def check_input(args):
     """Check the input files for good data."""
-    for in_file in util.get_input_files(args):
+    for in_file in util.get_input_files(args.input_dir, args.input_filter):
         logging.info('Checking fasta "{}"'.format(in_file))
         too_few_records(in_file)
         seq_too_long(in_file, args.seq_type)
@@ -47,7 +47,7 @@ def seq_too_long(fasta, seq_type):
 def fasta_to_tree(args):
     """Build trees from the fasta data."""
 
-    for fasta in util.get_input_files(args):
+    for fasta in util.get_input_files(args.input_dir, args.input_filter):
         if args.bootstrap:
             fasta_to_tree_bs(args, fasta)
         elif bio.fasta_record_count(fasta) >= bio.SEQ_COUNT_CUTOFF:

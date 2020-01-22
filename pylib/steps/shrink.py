@@ -8,11 +8,11 @@ from pylib.wrappers.treeshrink import treeshrink
 
 def shrink(args):
     """Remove long branches from trees."""
-    for tree in util.get_input_files(args):
-        logging.info('Step shrink: {}'.format(tree))
+    for tree in util.get_input_files(args.input_dir, args.input_filter):
+        logging.info('shrink input: {}'.format(tree))
 
         trimmed = treeshrink(tree, args.output_dir, args.quantiles)
-        logging.info('treeshrink: {}'.format(trimmed))
+        logging.info('treeshrink output: {}'.format(trimmed))
 
         unrooted = pxrr(trimmed, args.output_dir)
-        logging.info('pxrr: {}'.format(unrooted))
+        logging.info('pxrr output: {}'.format(unrooted))

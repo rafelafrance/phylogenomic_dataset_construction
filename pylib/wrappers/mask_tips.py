@@ -16,7 +16,6 @@ MIN_TREE = 4
 def mask_tips(fasta_file, tree_file, output_dir, mask_paraphyletic=None):
     """Wrap tree tip removal."""
     tree = Phylo.read(tree_file, 'newick')
-    print(tree)
     char_count = {s[0]: len(IGNORE.sub('', s[1]))
                   for s in bio.read_fasta(fasta_file).values()}
     mask_monophyletic_tips(tree, char_count)

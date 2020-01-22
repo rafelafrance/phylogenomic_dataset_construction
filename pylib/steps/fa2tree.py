@@ -13,8 +13,8 @@ from pylib.wrappers.fasttree import fasttree
 def fa2tree(args):
     """Build trees from the fasta data."""
 
-    for fasta in util.get_input_files(args):
-        logging.info('Step fa2tree: {}'.format(fasta))
+    for fasta in util.get_input_files(args.input_dir, args.input_filter):
+        logging.info('fa2tree input: {}'.format(fasta))
         if args.bootstrap:
             fa2tree_bs(args, fasta)
         elif bio.fasta_record_count(fasta) >= bio.SEQ_COUNT_CUTOFF:

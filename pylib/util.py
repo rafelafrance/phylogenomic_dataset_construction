@@ -21,7 +21,7 @@ def shorten(text):
 
 @contextmanager
 def make_temp_dir(where=None, prefix=None, keep=False):
-    """Handle creation and deletion of temporary directory."""
+    """Handle creation and deletion of a temporary directory."""
     temp_dir = mkdtemp(prefix=prefix, dir=where)
     try:
         yield temp_dir
@@ -60,9 +60,9 @@ def file_name(output_dir, path, suffix=None):
     return path
 
 
-def get_input_files(args):
+def get_input_files(input_dir, input_filter):
     """Get a list of the input files."""
-    pattern = join(args.input_dir, args.input_filter)
+    pattern = join(input_dir, input_filter)
     in_files = sorted([p for p in glob(pattern)])
     if len(in_files) == 0:
         logging.critical(

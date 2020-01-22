@@ -7,8 +7,8 @@ import pylib.bio as bio
 
 def check(args):
     """Check the input files for good data."""
-    for fasta in util.get_input_files(args):
-        logging.info('Step check: {}'.format(fasta))
+    for fasta in util.get_input_files(args.input_dir, args.input_filter):
+        logging.info('check input: {}'.format(fasta))
         too_few_records(fasta)
         seq_too_long(fasta, args.seq_type)
 
