@@ -3,17 +3,17 @@
 # pylint: disable=too-many-arguments
 
 from os.path import basename
+import subprocess
 from Bio.SeqIO.FastaIO import SimpleFastaParser
-from . import util
-from . import log
-from . import bio
+from pylib import util
+from pylib import bio
 
 
 MIN_LEN = 10
 
 
 def pxclsq(
-        fasta_file, output_dir, temp_dir, seq_type, min_occupancy, min_len):
+        fasta_file, output_dir, seq_type, min_occupancy, min_len):
     """Filter aligned sequences for occupancy and length."""
     temp_cleaned = util.file_name(output_dir, fasta_file, '_cleaned.fasta')
 
@@ -24,8 +24,8 @@ def pxclsq(
         '--seqf {}'.format(fasta_file),
         '--outf {}'.format(basename(temp_cleaned))])
 
-    with util.cd(temp_dir):
-        log.subcommand(cmd)
+    with util.cd(output_dir):
+        subprocess.check_call(cmd)
 
     cleaned = util.file_name(output_dir, fasta_file, '.cln')
 
@@ -37,7 +37,7 @@ def pxclsq(
     return cleaned
 
 
-def pxrr(tree_file, output_dir, temp_dir):
+def pxrr(tree_file, output_dir):
     """Unroot the tree returned by treeshrink."""
     unrooted = util.file_name(output_dir, tree_file, '.tt')
     cmd = ' '.join([
@@ -46,7 +46,7 @@ def pxrr(tree_file, output_dir, temp_dir):
         '--treef {}'.format(tree_file),
         '--outf {}'.format(unrooted)])
 
-    with util.cd(temp_dir):
-        log.subcommand(cmd)
+    with util.cd(output_dir):
+        subprocess.check_call(cmd)
 
     return unrooted

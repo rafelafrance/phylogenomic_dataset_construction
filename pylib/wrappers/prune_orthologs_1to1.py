@@ -1,7 +1,6 @@
 from shutil import copyfile
-from . import newick3
-from .tree_utils import get_front_names, pass_boot_filter
-from ..pylib import util
+from pylib.tree_utils import get_front_names, pass_boot_filter
+from pylib import util, newick3
 
 
 def prune_1to1(tree_file, output_dir, min_taxa, min_bootstrap=0.0):

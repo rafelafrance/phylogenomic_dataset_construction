@@ -55,9 +55,10 @@ def adjust_aa_seq(seq):
     return re.sub(r'\*.*', '', seq)
 
 
-def adjust_aa_seqs(fasta_file, temp_dir):
+def adjust_aa_seqs(fasta_file, output_dir):
     """Fix up amino acid sequences."""
-    out_path = join(temp_dir, splitext(basename(fasta_file))[0]) + '_aa.fasta'
+    out_path = join(
+        output_dir, splitext(basename(fasta_file))[0]) + '_aa.fasta'
 
     with open(fasta_file) as in_file, open(out_path, 'w') as out_file:
         for header, seq in SimpleFastaParser(in_file):

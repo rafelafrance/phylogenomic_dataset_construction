@@ -1,8 +1,8 @@
 """Wrap prank alignment tool."""
 
-from . import util
-from . import log
-from . import bio
+from pylib import util
+from pylib import log
+from pylib import bio
 
 
 def prank(fasta_file, output_dir, temp_dir, seq_type):
@@ -23,6 +23,6 @@ def prank(fasta_file, output_dir, temp_dir, seq_type):
     cmd = ' '.join(cmd)
 
     with util.cd(temp_dir):
-        log.subcommand(cmd, out_path=aligned)
+        subprocess.check_call(cmd, out_path=aligned)
 
     return aligned

@@ -1,29 +1,27 @@
-"""Wrap raxml-ng functions."""
+"""Wrap raxml functions."""
 
 # pylint: disable=too-many-arguments
 
 from os.path import basename, join, splitext
 from shutil import move
-from . import util
-from . import log
+import subprocess
+from pylib import util
 
 
-def raxml_ng(
-        fasta_file, output_dir, temp_dir,
-        seq_type, cpus, seed):
+def raxml(fasta_file, output_dir, seq_type, cpus, seed):
     """Build a tree with raxml."""
-    model = "Blosum62" if seq_type == "aa" else "GTR"
+    model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
     tree = splitext(basename(fasta_file))[0] + '.tre'
     cmd = ' '.join([
-        'raxml-ng',
+        'raxml',
         '-T {}'.format(cpus),
         '-p {}'.format(seed),
         '-m {}'.format(model),
         '-s {}'.format(fasta_file),
         '-n {}'.format(tree)])
 
-    with util.cd(temp_dir):
-        log.subcommand(cmd)
+    with util.cd(output_dir):
+        subprocess.check_call(cmd)
 
         tree_src = join('RAxML_bestTree.' + tree)
         tree_dst = join(output_dir, tree)
@@ -32,14 +30,14 @@ def raxml_ng(
     return tree_dst
 
 
-def raxml_ng_bs(
-        fasta_file, output_dir, temp_dir,
-        seq_type, cpus, seed, replicates=100):
+def raxml_bs(
+        fasta_file, output_dir, seq_type, cpus, seed,
+        replicates=100):
     """Build a bootstrapped tree with raxml."""
-    model = "Blosum62" if seq_type == "aa" else "GTR"
-    tree, _ = splitext(basename(fasta_file))[0] + '.tre'
+    model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
+    tree = splitext(basename(fasta_file))[0] + '.tre'
     cmd = ' '.join([
-        'raxml-ng',
+        'raxml',
         '-T {}'.format(cpus),
         '-f a',
         '-x {}'.format(seed),
@@ -49,8 +47,8 @@ def raxml_ng_bs(
         '-s {}'.format(fasta_file),
         '-n {}'.format(tree)])
 
-    with util.cd(temp_dir):
-        log.subcommand(cmd)
+    with util.cd(output_dir):
+        subprocess.check_call(cmd)
 
         tree_src = join('RAxML_bipartitions.' + tree)
         tree_dst = join(output_dir, tree)

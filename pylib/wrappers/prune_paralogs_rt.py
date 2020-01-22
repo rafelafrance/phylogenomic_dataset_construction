@@ -9,9 +9,8 @@ OUT taxonID3
 """
 
 import sys
-import oldlib.newick3 as newick3
-from . import tree_utils
-from ..pylib import util
+import pylib.newick3 as newick3
+from pylib import util, tree_utils
 
 
 def prune_rt(tree_file, output_dir, min_taxa, taxon_code_file):

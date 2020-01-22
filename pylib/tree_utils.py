@@ -1,4 +1,4 @@
-import oldlib.phylo3 as phylo3
+import pylib.phylo3 as phylo3
 import sys
 
 

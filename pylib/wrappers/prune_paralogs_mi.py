@@ -11,11 +11,7 @@ set OUTPUT_1to1_ORTHOLOGS to False
 """
 
 from shutil import copyfile
-from . import newick3
-from . import trim_tips
-from . import tree_utils
-from ..pylib import util
-
+from pylib import util, trim_tips, newick3, tree_utils
 
 OUTPUT_1to1_ORTHOLOGS = True
 

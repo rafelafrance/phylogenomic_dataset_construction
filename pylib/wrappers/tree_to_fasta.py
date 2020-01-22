@@ -1,8 +1,8 @@
 """Convert a Newick tree to a fasta file."""
 
 from Bio import Phylo
-from . import bio
-from . import util
+from pylib import bio
+from pylib import util
 
 
 def tree_to_fasta(old_fasta, tree_file, output_dir):

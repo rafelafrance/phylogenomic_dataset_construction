@@ -1,11 +1,10 @@
 """Wrap fasttree functions."""
 
-from os.path import basename, join, splitext
-from . import util
-from . import log
+import subprocess
+from pylib import util
 
 
-def fasttree(fasta_file, output_dir, temp_dir, seq_type):
+def fasttree(fasta_file, output_dir, seq_type):
     """Build a tree with fasttree."""
     cmd = ['fasttree', '-quiet']
     cmd += ['-wag'] if seq_type == 'aa' else ['-nt', '-gtr']
@@ -14,7 +13,7 @@ def fasttree(fasta_file, output_dir, temp_dir, seq_type):
 
     tree_file = util.file_name(output_dir, fasta_file, '.aligned')
 
-    with util.cd(temp_dir):
-        log.subcommand(cmd, out_path=tree_file)
+    with util.cd(output_dir):
+        subprocess.check_call(cmd)
 
     return tree_file

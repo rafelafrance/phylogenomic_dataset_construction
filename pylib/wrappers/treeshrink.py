@@ -1,11 +1,11 @@
 """Wrapper for the treeshrink program."""
 
 from os.path import basename, join
-from . import util
-from . import log
+import subprocess
+from pylib import util
 
 
-def treeshrink(tree_file, output_dir, temp_dir, quantiles):
+def treeshrink(tree_file, output_dir, quantiles):
     """Remove long branches from a tree."""
     subdir = util.file_name(output_dir, tree_file)
 
@@ -18,8 +18,8 @@ def treeshrink(tree_file, output_dir, temp_dir, quantiles):
         '--outdir {}'.format(basename(subdir)),
         '--tempdir {}'.format(basename(subdir))])
 
-    with util.cd(temp_dir):
-        log.subcommand(cmd)
+    with util.cd(output_dir):
+        subprocess.check_call(cmd)
 
     tree_src = join(subdir, tree_file)
     tree_dst = util.file_name(output_dir, tree_file, '.ts')

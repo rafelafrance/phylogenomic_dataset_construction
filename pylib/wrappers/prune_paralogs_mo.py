@@ -22,10 +22,7 @@ set OUTPUT_1TO1_ORTHOLOGS to False
 """
 
 from shutil import copyfile
-from . import phylo3
-from . import newick3
-from ..pylib import util
-
+from pylib import util, phylo3, newick3
 
 OUTPUT_1TO1_ORTHOLOGS = True
 

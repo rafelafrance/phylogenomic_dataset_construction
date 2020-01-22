@@ -1,6 +1,6 @@
 import sys
 from shlex import shlex
-from oldlib.phylo3 import Node
+from pylib.phylo3 import Node
 from io import StringIO
 
 

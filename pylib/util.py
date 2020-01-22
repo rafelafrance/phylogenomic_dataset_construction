@@ -1,7 +1,9 @@
 """Misc. utilities and constants."""
 
+import sys
 import os
 from os.path import basename, expanduser, join, splitext
+import logging
 from glob import glob
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -10,10 +12,6 @@ from contextlib import contextmanager
 
 __VERSION__ = '0.0.1'
 __TITLE__ = 'Phylogenomic Dataset Construction'
-
-
-class StopProcessing(Exception):
-    """Stop processing the item in the pipeline."""
 
 
 def shorten(text):
@@ -56,7 +54,18 @@ def taxon_id(header):
 
 def file_name(output_dir, path, suffix=None):
     """Build the output file name."""
-    file_name = join(output_dir, splitext(basename(path))[0])
+    path = join(output_dir, splitext(basename(path))[0])
     if suffix:
-        file_name += suffix
-    return file_name
+        path += suffix
+    return path
+
+
+def get_input_files(args):
+    """Get a list of the input files."""
+    pattern = join(args.input_dir, args.input_filter)
+    in_files = sorted([p for p in glob(pattern)])
+    if len(in_files) == 0:
+        logging.critical(
+            'No files were found with this mask: "{}".'.format(pattern))
+        sys.exit(1)
+    return in_files
