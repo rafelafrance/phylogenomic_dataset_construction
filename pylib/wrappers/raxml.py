@@ -8,10 +8,10 @@ import subprocess
 from pylib import util
 
 
-def raxml(fasta_file, output_dir, seq_type, cpus, seed):
+def raxml(fasta_file, output_dir, seq_type, cpus, seed, output_extension):
     """Build a tree with raxml."""
     model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
-    tree = splitext(basename(fasta_file))[0] + '.tre'
+    tree = util.file_name(output_dir, fasta_file, output_extension)
     cmd = ' '.join([
         'raxml',
         '-T {}'.format(cpus),
@@ -21,7 +21,7 @@ def raxml(fasta_file, output_dir, seq_type, cpus, seed):
         '-n {}'.format(tree)])
 
     with util.cd(output_dir):
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, shell=True)
 
         tree_src = join('RAxML_bestTree.' + tree)
         tree_dst = join(output_dir, tree)
@@ -31,11 +31,11 @@ def raxml(fasta_file, output_dir, seq_type, cpus, seed):
 
 
 def raxml_bs(
-        fasta_file, output_dir, seq_type, cpus, seed,
+        fasta_file, output_dir, seq_type, cpus, seed, output_extension,
         replicates=100):
     """Build a bootstrapped tree with raxml."""
     model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
-    tree = splitext(basename(fasta_file))[0] + '.tre'
+    tree = util.file_name(output_dir, fasta_file, output_extension)
     cmd = ' '.join([
         'raxml',
         '-T {}'.format(cpus),
@@ -48,7 +48,7 @@ def raxml_bs(
         '-n {}'.format(tree)])
 
     with util.cd(output_dir):
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, shell=True)
 
         tree_src = join('RAxML_bipartitions.' + tree)
         tree_dst = join(output_dir, tree)

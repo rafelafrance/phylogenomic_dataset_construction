@@ -5,7 +5,7 @@ import subprocess
 from pylib import util
 
 
-def treeshrink(tree_file, output_dir, quantiles):
+def treeshrink(tree_file, output_dir, quantiles, output_extension):
     """Remove long branches from a tree."""
     subdir = util.file_name(output_dir, tree_file)
 
@@ -19,10 +19,10 @@ def treeshrink(tree_file, output_dir, quantiles):
         '--tempdir {}'.format(basename(subdir))])
 
     with util.cd(output_dir):
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, shell=True)
 
     tree_src = join(subdir, tree_file)
-    tree_dst = util.file_name(output_dir, tree_file, '.ts')
+    tree_dst = util.file_name(output_dir, tree_file, output_extension)
 
     with open(tree_src) as in_file, open(tree_dst, 'w') as out_file:
         content = in_file.read()

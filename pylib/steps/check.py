@@ -9,8 +9,22 @@ def check(args):
     """Check the input files for good data."""
     for fasta in util.get_input_files(args.input_dir, args.input_filter):
         logging.info('check input: {}'.format(fasta))
+        duplicate_names(fasta)
         too_few_records(fasta)
         seq_too_long(fasta, args.seq_type)
+
+
+def duplicate_names(fasta):
+    """Duplicate names are not allowed."""
+    seen = set()
+    mentioned = set()
+    for seq_name, _ in bio.read_fasta_records(fasta):
+        if seq_name in seen and seq_name not in mentioned:
+            logging.error(
+                'The sequence name {} is in {} more than once'.format(
+                    seq_name, fasta))
+            mentioned.add(seq_name)
+        seen.add(seq_name)
 
 
 def too_few_records(fasta):

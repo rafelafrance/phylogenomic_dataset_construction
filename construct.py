@@ -9,6 +9,7 @@ import logging
 from os.path import abspath, exists, expanduser
 import argparse
 from pylib import util
+from pylib import bio
 from pylib.steps.check import check
 from pylib.steps.fa2tree import fa2tree
 from pylib.steps.shrink import shrink
@@ -41,10 +42,9 @@ def parse_args():
         Infer orthologies for phylogenomic analyses.""")
 
     epilog = util.shorten("""
-        To get help on a particular step type the step name and then -h (Note:
-        the "-h" must be after the step name). For example to get help on step
-        1 you can type: "./construct.py fa2tree -h".
-        """)
+        To get help on a particular step type the step name and then -h.
+        For example to get help on step 1 you can type:
+        "./construct.py fa2tree -h".""")
 
     usage = """{} [-h] STEP""".format(__file__)
 
@@ -85,7 +85,16 @@ def fasta2tree_step(subparsers):
     """Add fa2tree step."""
     fa2tree_parser = subparsers.add_parser(
         'fa2tree', help=helper("""Build homolog trees from fasta files. This
-            will align the sequence """))
+            performs three steps: 1) It will align the sequences. 2) It will
+            clean the aligned sequences. 3) Create a tree from the cleaned and
+            aligned sequences. Normally, this program will use "mafft" to
+            align the sequences, "pxclsq" to clean them, and "raxml" to build
+            the tree. If you select the "--bootstrap" option it still uses
+            "mafft" and "pxclsq" for aligning and cleaning but it uses
+            "raxml_bs" for tree building. And it the fasta file has more than
+            {} sequences then it will use "pasta" for alignment, "pxclsq" for
+            cleaning and "fasttree" for tree building.""".format(
+            bio.SEQ_COUNT_CUTOFF)))
     io_args(fa2tree_parser, '*.fasta', '.tre')
     seq_type_arg(fa2tree_parser)
     cpus_arg(fa2tree_parser)
@@ -161,7 +170,7 @@ def helper(msg):
     """Build a help message."""
     global STEP
     STEP += 1
-    return 'Step {}: {}'.format(STEP, msg)
+    return 'STEP {}: {}'.format(STEP, msg)
 
 
 def io_args(parser, default_filter, default_ext):
@@ -211,13 +220,12 @@ def seq_type_arg(parser):
 
 def cpus_arg(parser):
     """How many CPUS to use."""
-    cpus = min(10, os.cpu_count() - 4 if os.cpu_count() > 4 else 1)
     parser.add_argument(
-        '--cpus', '--processes', type=int, default=cpus,
+        '--cpus', type=int, default=1,
         help="""Number of CPU processors to use. This is passed to wrapped
-            programs that use this option like: mafft.
-            The default will use {} out of {} CPUs.
-            """.format(cpus, os.cpu_count()))
+            programs that use this option like: mafft or pasta.
+            The default will use 1 out of {} CPUs.
+            """.format(os.cpu_count()))
 
 
 def other_args(parser):

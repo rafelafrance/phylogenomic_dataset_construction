@@ -36,6 +36,13 @@ def read_fasta(fasta_file):
         return {s[0]: s[1] for s in SimpleFastaParser(fasta_file)}
 
 
+def read_fasta_records(fasta_file):
+    """Read in a fasta file for further processing."""
+    with open(fasta_file) as fasta_file:
+        for seq_name, seq in SimpleFastaParser(fasta_file):
+            yield seq_name, seq
+
+
 def fasta_record_count(fasta):
     """Count the number of records in a fasta file."""
     with open(fasta) as fasta_file:

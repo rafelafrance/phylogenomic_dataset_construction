@@ -12,5 +12,6 @@ def tree2fa(args):
 
     for fasta, tree in zip(masks, trees):
         logging.info('tree2fa input: {}'.format(tree))
-        new_fasta = tree_to_fasta(fasta, tree, args.output_dir)
+        new_fasta = tree_to_fasta(
+            fasta, tree, args.output_dir, args.output_extension)
         logging.info('tree_to_fasta output: {}'.format(new_fasta))

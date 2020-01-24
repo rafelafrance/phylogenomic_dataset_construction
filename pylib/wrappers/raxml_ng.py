@@ -2,18 +2,18 @@
 
 # pylint: disable=too-many-arguments
 
+import subprocess
 from os.path import basename, join, splitext
 from shutil import move
 from pylib import util
-from pylib import log
 
 
 def raxml_ng(
         fasta_file, output_dir, temp_dir,
-        seq_type, cpus, seed):
+        seq_type, cpus, seed, output_extension):
     """Build a tree with raxml."""
     model = "Blosum62" if seq_type == "aa" else "GTR"
-    tree = splitext(basename(fasta_file))[0] + '.tre'
+    tree = util.file_name(output_dir, fasta_file, output_extension)
     cmd = ' '.join([
         'raxml-ng',
         '-T {}'.format(cpus),
@@ -23,7 +23,7 @@ def raxml_ng(
         '-n {}'.format(tree)])
 
     with util.cd(temp_dir):
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, shell=True)
 
         tree_src = join('RAxML_bestTree.' + tree)
         tree_dst = join(output_dir, tree)
@@ -34,10 +34,10 @@ def raxml_ng(
 
 def raxml_ng_bs(
         fasta_file, output_dir, temp_dir,
-        seq_type, cpus, seed, replicates=100):
+        seq_type, cpus, seed, output_extension, replicates=100):
     """Build a bootstrapped tree with raxml."""
     model = "Blosum62" if seq_type == "aa" else "GTR"
-    tree, _ = splitext(basename(fasta_file))[0] + '.tre'
+    tree = util.file_name(output_dir, fasta_file, output_extension)
     cmd = ' '.join([
         'raxml-ng',
         '-T {}'.format(cpus),
@@ -50,7 +50,7 @@ def raxml_ng_bs(
         '-n {}'.format(tree)])
 
     with util.cd(temp_dir):
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, shell=True)
 
         tree_src = join('RAxML_bipartitions.' + tree)
         tree_dst = join(output_dir, tree)

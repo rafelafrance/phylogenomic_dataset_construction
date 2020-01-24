@@ -11,8 +11,9 @@ def shrink(args):
     for tree in util.get_input_files(args.input_dir, args.input_filter):
         logging.info('shrink input: {}'.format(tree))
 
-        trimmed = treeshrink(tree, args.output_dir, args.quantiles)
+        trimmed = treeshrink(
+            tree, args.output_dir, args.quantiles, args.output_extension)
         logging.info('treeshrink output: {}'.format(trimmed))
 
-        unrooted = pxrr(trimmed, args.output_dir)
+        unrooted = pxrr(trimmed, args.output_dir, args.output_extension)
         logging.info('pxrr output: {}'.format(unrooted))
