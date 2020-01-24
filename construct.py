@@ -6,7 +6,7 @@ import re
 import sys
 import os
 import logging
-from os.path import abspath, exists, expanduser
+from os.path import abspath, expanduser
 import argparse
 from pylib import util
 from pylib import bio
@@ -29,10 +29,13 @@ def construct():
         level=logging.INFO, format=formatter,  datefmt='%Y-%m-%d %H:%M:%S')
 
     args = parse_args()
+
+    step_name = args.func.__name__  # Get entered step via its function name
+    if step_name == 'prune':
+        check_args(args)
+        parse_out_groups(args)
+
     args.func(args)
-    # check_args(ARGS)
-    # parse_out_groups(ARGS)
-    # core.pipeline(ARGS)
 
 
 def parse_args():
@@ -138,10 +141,10 @@ def mask_step(subparsers):
     input_dir(mask_parser)
     input_filter(mask_parser, '*.cln', long='--clean-filter', short='-c')
     input_filter(mask_parser, '*.ts', long='--tree-filter', short='-t')
-    # mask_parser.add_argument(
-    #     '--mask-paraphyletic', action='store_true',
-    #     help="""When masking tree tips, do you want to also mask paraphyletic
-    #         tips.""")
+    mask_parser.add_argument(
+        '--mask-paraphyletic', action='store_true',
+        help="""When masking tree tips, do you want to also mask paraphyletic
+            tips.""")
     mask_parser.set_defaults(func=mask)
 
 
@@ -287,9 +290,6 @@ def other_args(parser):
 
 def check_args(args):
     """Check arguments are consistent."""
-    if args.temp_dir and not exists(args.temp_dir):
-        sys.exit('The temporary directory must exist.')
-
     if args.prune == 'mo' and not args.in_groups:
         sys.exit(util.shorten("""You must specify out-groups
             when --prune=mo."""))
