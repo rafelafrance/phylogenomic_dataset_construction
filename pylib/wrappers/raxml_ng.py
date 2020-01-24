@@ -10,10 +10,10 @@ from pylib import util
 
 def raxml_ng(
         fasta_file, output_dir, temp_dir,
-        seq_type, cpus, seed, output_extension):
+        seq_type, cpus, seed, output_ext):
     """Build a tree with raxml."""
     model = "Blosum62" if seq_type == "aa" else "GTR"
-    tree = util.file_name(output_dir, fasta_file, output_extension)
+    tree = util.file_name(fasta_file, output_ext)
     cmd = ' '.join([
         'raxml-ng',
         '-T {}'.format(cpus),
@@ -32,12 +32,11 @@ def raxml_ng(
     return tree_dst
 
 
-def raxml_ng_bs(
-        fasta_file, output_dir, temp_dir,
-        seq_type, cpus, seed, output_extension, replicates=100):
+def raxml_ng_bs(fasta_file, output_dir, temp_dir,
+                seq_type, cpus, seed, output_ext, replicates=100):
     """Build a bootstrapped tree with raxml."""
     model = "Blosum62" if seq_type == "aa" else "GTR"
-    tree = util.file_name(output_dir, fasta_file, output_extension)
+    tree = util.file_name(fasta_file, output_ext, output_dir)
     cmd = ' '.join([
         'raxml-ng',
         '-T {}'.format(cpus),

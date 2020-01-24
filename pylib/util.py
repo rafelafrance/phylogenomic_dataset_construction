@@ -52,9 +52,11 @@ def taxon_id(header):
     return header.split('@')[0]
 
 
-def file_name(output_dir, path, suffix=None):
+def file_name(base_name, suffix=None, output_dir=None):
     """Build the output file name."""
-    path = join(output_dir, splitext(basename(path))[0])
+    path = splitext(basename(base_name))[0]
+    if output_dir:
+        path = join(output_dir, path)
     if suffix:
         path += suffix
     return path

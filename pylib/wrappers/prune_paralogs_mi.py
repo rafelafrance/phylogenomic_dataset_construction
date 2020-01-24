@@ -57,9 +57,8 @@ def prune(score_tuple, node, root, pp_trees):
     return newroot, False  # original root was cutoff, not done yet
 
 
-def prune_mi(
-        tree_file, output_dir, min_taxa,
-        relative_tip_cutoff, absolute_tip_cutoff):
+def prune_mi(tree_file, output_dir, min_taxa,
+             relative_tip_cutoff, absolute_tip_cutoff):
     output_files = []
 
     with open(tree_file) as infile:  # only 1 tree in each file
@@ -69,8 +68,8 @@ def prune_mi(
     if get_front_score(curroot) >= min_taxa:  # No need to prune
         print("No pruning needed")
         if OUTPUT_1to1_ORTHOLOGS:
-            output_file = util.file_name(
-                output_dir, tree_file, '_1to1ortho.tre')
+            output_file = util.file_name(tree_file, '_1to1ortho.tre',
+                                         output_dir)
             copyfile(tree_file, output_file)
             output_files.append(output_file)
     else:  # scoring the tree
@@ -104,8 +103,9 @@ def prune_mi(
                 tree = trim_tips.trim(tree, relative_tip_cutoff,
                                       absolute_tip_cutoff)
                 if tree is not None and len(tree.leaves()) >= min_taxa:
-                    output_file = util.file_name(
-                        output_dir, tree_file, '_MIortho{}.tre'.format(count))
+                    output_file = util.file_name(tree_file,
+                                                 '_MIortho{}.tre'.format(
+                                                     count), output_dir)
                     output_files.append(output_file)
                     with open(output_file, "w") as outfile:
                         outfile.write(newick3.tostring(tree) + ";\n")

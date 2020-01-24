@@ -1,9 +1,9 @@
 """Utilities for working with sequences."""
 
 import re
-from os.path import basename, join, splitext
 from functools import reduce
 from Bio.SeqIO.FastaIO import SimpleFastaParser
+from . import util
 
 CODON_LEN = 3
 
@@ -64,15 +64,15 @@ def adjust_aa_seq(seq):
 
 def adjust_aa_seqs(fasta_file, output_dir):
     """Fix up amino acid sequences."""
-    out_path = join(
-        output_dir, splitext(basename(fasta_file))[0]) + '_aa.fasta'
+    file_name = util.file_name(fasta_file, '_aa.fasta')
 
-    with open(fasta_file) as in_file, open(out_path, 'w') as out_file:
-        for header, seq in SimpleFastaParser(in_file):
-            seq = adjust_aa_seq(seq)
-            write_fasta_record(out_file, header, seq)
+    with util.cd(output_dir):
+        with open(fasta_file) as in_file, open(file_name, 'w') as out_file:
+            for header, seq in SimpleFastaParser(in_file):
+                seq = adjust_aa_seq(seq)
+                write_fasta_record(out_file, header, seq)
 
-    return out_path
+    return file_name
 
 
 def write_fasta_record(out_file, header, seq):

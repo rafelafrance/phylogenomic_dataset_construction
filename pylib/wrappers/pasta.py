@@ -7,7 +7,7 @@ from pylib import util
 from pylib import bio
 
 
-def pasta(fasta_file, output_dir, seq_type, output_extension, cpus):
+def pasta(fasta_file, output_dir, output_ext, seq_type, cpus):
     """Align sequences."""
     in_path = fasta_file
     if seq_type == 'aa':
@@ -25,8 +25,8 @@ def pasta(fasta_file, output_dir, seq_type, output_extension, cpus):
 
     base_name = splitext(basename(fasta_file))[0]
     temp_aligned = join(
-        output_dir, 'pastajob.marker001.' + base_name + output_extension)
-    aligned = join(output_dir, base_name + output_extension)
+        output_dir, 'pastajob.marker001.' + base_name + output_ext)
+    aligned = join(output_dir, base_name + output_ext)
     move(temp_aligned, aligned)
 
     util.remove_files(join(output_dir, 'pastajob*'))

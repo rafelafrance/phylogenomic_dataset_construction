@@ -7,7 +7,7 @@ from pylib import bio
 MAX_ITERATE = 10_000
 
 
-def mafft(fasta_file, output_dir, seq_type, cpus, anysymbol, output_extension):
+def mafft(fasta_file, output_dir, output_ext, seq_type, cpus, anysymbol):
     """Align sequences."""
     in_path = fasta_file
     if seq_type == 'aa':
@@ -31,9 +31,11 @@ def mafft(fasta_file, output_dir, seq_type, cpus, anysymbol, output_extension):
     cmd.append(in_path)
     cmd = ' '.join(cmd)
 
-    aligned = util.file_name(output_dir, fasta_file, output_extension)
+    aligned = util.file_name(fasta_file, output_ext)
 
     with util.cd(output_dir):
-        subprocess.check_call(cmd, shell=True)
+        result = subprocess.check_output(cmd, shell=True)
+        with open(aligned, 'wb') as out_file:
+            out_file.write(result)
 
     return aligned

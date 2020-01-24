@@ -208,7 +208,7 @@ def output_args(parser, default_ext):
             current directory.""")
 
     parser.add_argument(
-        '-e', '--output-extension', metavar='EXT', default=default_ext,
+        '-e', '--output-ext', metavar='EXT', default=default_ext,
         help="""The file extention to use for the output files. 
             The default is '{}'.""".format(default_ext))
 

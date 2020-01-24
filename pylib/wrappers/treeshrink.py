@@ -5,9 +5,9 @@ import subprocess
 from pylib import util
 
 
-def treeshrink(tree_file, output_dir, quantiles, output_extension):
+def treeshrink(tree_file, output_dir, quantiles, output_ext):
     """Remove long branches from a tree."""
-    subdir = util.file_name(output_dir, tree_file)
+    subdir = util.file_name(tree_file)
 
     cmd = ' '.join([
         'run_treeshrink.py',
@@ -22,7 +22,7 @@ def treeshrink(tree_file, output_dir, quantiles, output_extension):
         subprocess.check_call(cmd, shell=True)
 
     tree_src = join(subdir, tree_file)
-    tree_dst = util.file_name(output_dir, tree_file, output_extension)
+    tree_dst = util.file_name(tree_file, output_ext)
 
     with open(tree_src) as in_file, open(tree_dst, 'w') as out_file:
         content = in_file.read()

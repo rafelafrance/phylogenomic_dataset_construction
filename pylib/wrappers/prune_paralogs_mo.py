@@ -200,8 +200,8 @@ def prune_mo(tree_file, output_dir, min_taxa, out_groups):
     # If the homolog has no taxon duplication, no cutting is needed
     if num_tips == num_taxa:
         if OUTPUT_1TO1_ORTHOLOGS:
-            output_file = util.file_name(
-                output_dir, tree_file, '_1to1ortho.tre')
+            output_file = util.file_name(tree_file, '_1to1ortho.tre',
+                                         output_dir)
             copyfile(tree_file, output_file)
             output_files.append(output_file)
     else:
@@ -225,15 +225,15 @@ def prune_mo(tree_file, output_dir, min_taxa, out_groups):
             curroot = reroot_with_monophyletic_outgroups(curroot, out_groups)
             # only return one tree after pruning
             if curroot is not None:
-                output_file = util.file_name(output_dir, tree_file, '.reroot')
+                output_file = util.file_name(tree_file, '.reroot')
                 output_files.append(output_file)
                 with open(output_file, "w") as outfile:
                     outfile.write(newick3.tostring(curroot) + ";\n")
                 ortho = prune_paralogs_from_rerooted_homotree(
                     curroot, out_groups)
                 if len(set(get_front_names(curroot))) >= min_taxa:
-                    output_file = util.file_name(
-                        output_dir, tree_file, '.ortho.tre')
+                    output_file = util.file_name(tree_file, '.ortho.tre',
+                                                 output_dir)
                     output_file += '.ortho.tre'
                     output_files.append(output_file)
                     with open(output_file, "w") as outfile:

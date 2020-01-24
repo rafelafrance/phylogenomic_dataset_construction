@@ -8,10 +8,10 @@ import subprocess
 from pylib import util
 
 
-def raxml(fasta_file, output_dir, seq_type, cpus, seed, output_extension):
+def raxml(fasta_file, output_dir, output_ext, seq_type, cpus, seed):
     """Build a tree with raxml."""
     model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
-    tree = util.file_name(output_dir, fasta_file, output_extension)
+    tree = util.file_name(fasta_file, output_ext, output_dir)
     cmd = ' '.join([
         'raxml',
         '-T {}'.format(cpus),
@@ -30,12 +30,11 @@ def raxml(fasta_file, output_dir, seq_type, cpus, seed, output_extension):
     return tree_dst
 
 
-def raxml_bs(
-        fasta_file, output_dir, seq_type, cpus, seed, output_extension,
-        replicates=100):
+def raxml_bs(fasta_file, output_dir, output_ext, seq_type, cpus, seed,
+             replicates=100):
     """Build a bootstrapped tree with raxml."""
     model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
-    tree = util.file_name(output_dir, fasta_file, output_extension)
+    tree = util.file_name(fasta_file, output_ext)
     cmd = ' '.join([
         'raxml',
         '-T {}'.format(cpus),

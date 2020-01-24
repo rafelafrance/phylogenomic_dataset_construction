@@ -65,8 +65,9 @@ def prune_rt(tree_file, output_dir, min_taxa, taxon_code_file):
         inclade_count = 0
         for inclade in inclades:
             inclade_count += 1
-            output_file = util.file_name(
-                output_dir, tree_file, '.inclade{}'.format(inclade_count))
+            output_file = util.file_name(tree_file,
+                                         '.inclade{}'.format(inclade_count),
+                                         output_dir)
             output_files.append(output_file)
             with open(output_file, "w") as outfile:
                 outfile.write(newick3.tostring(inclade) + ";\n")
@@ -76,16 +77,15 @@ def prune_rt(tree_file, output_dir, min_taxa, taxon_code_file):
                 if len(tree_utils.get_front_labels(ortho)) >= min_taxa:
                     ortho_count += 1
                     output_file = util.file_name(
-                        output_dir, tree_file,
-                        '.ortho{}.tre'.format(ortho_count))
+                        tree_file, '.ortho{}.tre'.format(ortho_count))
                     output_files.append(output_file)
                     with open(output_file, "w") as outfile:
                         outfile.write(newick3.tostring(ortho) + ";\n")
 
     elif len(all_names) == num_taxa:
         # only output ortho tree when there is no taxon repeats
-        output_file = util.file_name(
-            output_dir, tree_file, '.unrooted-ortho.tre')
+        output_file = util.file_name(tree_file, '.unrooted-ortho.tre',
+                                     output_dir)
         output_files.append(output_file)
         with open(output_file, "w") as outfile:
             outfile.write(newick3.tostring(curroot) + ";\n")

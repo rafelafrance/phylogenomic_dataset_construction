@@ -14,5 +14,5 @@ def mask(args):
         logging.info('mask input: {}'.format(fasta))
         logging.info('mask input: {}'.format(tree))
         masked = mask_tips(
-            fasta, tree, args.output_dir, args.output_extension)
+            fasta, tree, args.output_dir, args.output_ext)
         logging.info('mask_tips output: {}'.format(masked))

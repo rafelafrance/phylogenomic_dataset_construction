@@ -23,7 +23,7 @@ def mask_tips(fasta_file, tree_file, output_dir, mask_paraphyletic):
     chars = {k: len(IGNORE.sub('', v))
              for k, v in bio.read_fasta(fasta_file).items()}
 
-    output = util.file_name(output_dir, tree_file, '.mm')
+    output = util.file_name(tree_file, '.mm')
 
     root = mask_monophyletic_tips(in_tree, chars)
 
