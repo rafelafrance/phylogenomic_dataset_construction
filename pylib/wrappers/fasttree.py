@@ -14,6 +14,8 @@ def fasttree(fasta_file, output_dir, output_ext, seq_type):
     tree_file = util.file_name(fasta_file, output_ext)
 
     with util.cd(output_dir):
-        subprocess.check_call(cmd, shell=True)
+        result = subprocess.check_output(cmd, shell=True)
+        with open(tree_file, 'wb') as out_file:
+            out_file.write(result)
 
     return tree_file

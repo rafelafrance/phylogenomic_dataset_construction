@@ -15,7 +15,7 @@ MIN_LEN = 10
 def pxclsq(fasta_file, output_dir, output_ext, seq_type, min_occupancy,
            min_len):
     """Filter aligned sequences for occupancy and length."""
-    ext = '_temp' + output_ext + '.cln'
+    ext = output_ext + '.cln'
     temp_cleaned = util.file_name(fasta_file, ext)
 
     cmd = ' '.join([
@@ -29,11 +29,12 @@ def pxclsq(fasta_file, output_dir, output_ext, seq_type, min_occupancy,
 
     with util.cd(output_dir):
         subprocess.check_call(cmd, shell=True)
-
         with open(temp_cleaned) as in_file, open(cleaned, 'w') as out_file:
             for header, seq in SimpleFastaParser(in_file):
                 if len(seq.replace('-', '')) >= min_len:
                     bio.write_fasta_record(out_file, header, seq)
+
+        util.remove_files('phyx.logfile')
 
     return cleaned
 

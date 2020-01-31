@@ -2,7 +2,6 @@
 
 # pylint: disable=too-many-arguments
 
-from os.path import basename, join, splitext
 from shutil import move
 import subprocess
 from pylib import util
@@ -11,7 +10,7 @@ from pylib import util
 def raxml(fasta_file, output_dir, output_ext, seq_type, cpus, seed):
     """Build a tree with raxml."""
     model = "PROTCATWAG" if seq_type == "aa" else "GTRCAT"
-    tree = util.file_name(fasta_file, output_ext, output_dir)
+    tree = util.file_name(fasta_file, output_ext)
     cmd = ' '.join([
         'raxml',
         '-T {}'.format(cpus),
@@ -22,12 +21,11 @@ def raxml(fasta_file, output_dir, output_ext, seq_type, cpus, seed):
 
     with util.cd(output_dir):
         subprocess.check_call(cmd, shell=True)
+        tree_src = 'RAxML_bestTree.' + tree
+        move(tree_src, tree)
+        util.remove_files('RAxML_*')
 
-        tree_src = join('RAxML_bestTree.' + tree)
-        tree_dst = join(output_dir, tree)
-        move(tree_src, tree_dst)
-
-    return tree_dst
+    return tree
 
 
 def raxml_bs(fasta_file, output_dir, output_ext, seq_type, cpus, seed,
@@ -48,9 +46,8 @@ def raxml_bs(fasta_file, output_dir, output_ext, seq_type, cpus, seed,
 
     with util.cd(output_dir):
         subprocess.check_call(cmd, shell=True)
+        tree_src = 'RAxML_bipartitions.' + tree
+        move(tree_src, tree)
+        util.remove_files('RAxML_*')
 
-        tree_src = join('RAxML_bipartitions.' + tree)
-        tree_dst = join(output_dir, tree)
-        move(tree_src, tree_dst)
-
-    return tree_dst
+    return tree

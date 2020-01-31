@@ -1,10 +1,12 @@
 """Wrap pasta functions."""
 
-from os.path import abspath, basename, join, splitext
+from os.path import abspath, basename, splitext
 from shutil import move, which
 import subprocess
 from pylib import util
 from pylib import bio
+
+EXT = '.aln'
 
 
 def pasta(fasta_file, output_dir, output_ext, seq_type, cpus):
@@ -23,12 +25,11 @@ def pasta(fasta_file, output_dir, output_ext, seq_type, cpus):
     with util.cd(output_dir):
         subprocess.check_call(cmd, shell=True)
 
-    base_name = splitext(basename(fasta_file))[0]
-    temp_aligned = join(
-        output_dir, 'pastajob.marker001.' + base_name + output_ext)
-    aligned = join(output_dir, base_name + output_ext)
-    move(temp_aligned, aligned)
+        base_name = splitext(basename(fasta_file))[0]
+        temp_aligned = 'pastajob.marker001.' + base_name + EXT
+        aligned = base_name + output_ext
+        move(temp_aligned, aligned)
 
-    util.remove_files(join(output_dir, 'pastajob*'))
+        util.remove_files('pastajob*')
 
     return aligned
