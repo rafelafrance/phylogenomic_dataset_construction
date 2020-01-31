@@ -125,7 +125,7 @@ def shrink_step(subparsers):
     """Add shrink step."""
     shrink_parser = subparsers.add_parser(
         'shrink', help=helper("""Trim spurious tips with TreeShrink."""))
-    io_args(shrink_parser, '*.tre', '.ts')
+    io_args(shrink_parser, '*.tre', '.tt')
     shrink_parser.add_argument(
         '--quantiles', type=float, default=0.05,
         help="""A TreeShrink only option for tree trimming quantiles. The

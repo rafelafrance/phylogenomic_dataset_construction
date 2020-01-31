@@ -14,6 +14,10 @@ __VERSION__ = '0.0.1'
 __TITLE__ = 'Phylogenomic Dataset Construction'
 
 
+class Break(Exception):
+    """Used to break out of nested loops."""
+
+
 def shorten(text):
     """Collapse whitespace in a string."""
     return ' '.join(text.split())
@@ -52,13 +56,13 @@ def taxon_id(header):
     return header.split('@')[0]
 
 
-def file_name(base_name, suffix=None, output_dir=None):
+def file_name(base_name, ext=None, dir_=None):
     """Build the output file name."""
     path = splitext(basename(base_name))[0]
-    if output_dir:
-        path = join(output_dir, path)
-    if suffix:
-        path += suffix
+    if dir_:
+        path = join(dir_, path)
+    if ext:
+        path += ext
     return path
 
 

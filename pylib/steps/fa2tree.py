@@ -26,14 +26,17 @@ def fa2tree(args):
 
 def fa2tree_bs(args, fasta):
     """Build trees from the fasta data, bootstrap version."""
+    logging.info('mafft started')
     aligned = mafft(fasta, args.output_dir, args.output_ext, args.seq_type,
                     args.cpus, args.anysymbol)
     logging.info('mafft output: {}'.format(aligned))
 
+    logging.info('pxclsq started')
     cleaned = pxclsq(aligned, args.output_dir, args.output_ext, args.seq_type,
                      args.min_occupancy, args.min_seq_len)
     logging.info('pxclsq output: {}'.format(cleaned))
 
+    logging.info('raxml_bs started')
     tree = raxml_bs(cleaned, args.output_dir, args.output_ext, args.seq_type,
                     args.cpus, args.seed)
     logging.info('raxml_bs output: {}'.format(tree))
@@ -41,28 +44,34 @@ def fa2tree_bs(args, fasta):
 
 def fa2tree_big(args, fasta):
     """Build trees from the fasta data, large file version."""
+    logging.info('pasta started')
     aligned = pasta(fasta, args.output_dir, args.output_ext, args.seq_type,
                     args.cpus)
     logging.info('pasta output: {}'.format(aligned))
 
+    logging.info('pxclsq started')
     cleaned = pxclsq(aligned, args.output_dir, args.output_ext, args.seq_type,
                      args.min_occupancy, args.min_seq_len)
     logging.info('pxclsq output: {}'.format(cleaned))
 
+    logging.info('fasttree started')
     tree = fasttree(cleaned, args.output_dir, args.output_ext, args.seq_type)
     logging.info('fasttree output: {}'.format(tree))
 
 
 def fa2tree_default(args, fasta):
     """Build trees from the fasta data, normal version."""
+    logging.info('mafft started')
     aligned = mafft(fasta, args.output_dir, args.output_ext, args.seq_type,
                     args.cpus, args.anysymbol)
     logging.info('mafft output: {}'.format(aligned))
 
+    logging.info('pxclsq started')
     cleaned = pxclsq(aligned, args.output_dir, args.output_ext, args.seq_type,
                      args.min_occupancy, args.min_seq_len)
     logging.info('pxclsq output: {}'.format(cleaned))
 
+    logging.info('raxml started')
     tree = raxml(cleaned, args.output_dir, args.output_ext, args.seq_type,
                  args.cpus, args.seed)
     logging.info('raxml output: {}'.format(tree))

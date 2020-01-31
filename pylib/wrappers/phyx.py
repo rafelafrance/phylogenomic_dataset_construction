@@ -10,12 +10,13 @@ from pylib import bio
 
 
 MIN_LEN = 10
+EXT_PXCLSQ = '.cln'
 
 
 def pxclsq(fasta_file, output_dir, output_ext, seq_type, min_occupancy,
            min_len):
     """Filter aligned sequences for occupancy and length."""
-    ext = output_ext + '.cln'
+    ext = output_ext + EXT_PXCLSQ
     temp_cleaned = util.file_name(fasta_file, ext)
 
     cmd = ' '.join([
@@ -39,9 +40,9 @@ def pxclsq(fasta_file, output_dir, output_ext, seq_type, min_occupancy,
     return cleaned
 
 
-def pxrr(tree_file, output_dir, output_ext):
+def pxrr(tree_file, output_dir):
     """Unroot the tree returned by treeshrink."""
-    unrooted = util.file_name(tree_file, output_ext)
+    unrooted = util.file_name(tree_file)
     cmd = ' '.join([
         'pxrr',
         '--unroot',
@@ -50,5 +51,6 @@ def pxrr(tree_file, output_dir, output_ext):
 
     with util.cd(output_dir):
         subprocess.check_call(cmd, shell=True)
+        util.remove_files('phyx.logfile')
 
     return unrooted

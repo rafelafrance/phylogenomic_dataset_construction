@@ -1,11 +1,15 @@
 """Wrapper for the treeshrink program."""
 
-from os.path import basename, join
+from glob import glob
+from shutil import rmtree
 import subprocess
 from pylib import util
 
+EXT_IN = '.tre'
+EXT_OUT = '.ts'
 
-def treeshrink(tree_file, output_dir, quantiles, output_ext):
+
+def treeshrink(tree_file, output_dir, output_ext, quantiles):
     """Remove long branches from a tree."""
     subdir = util.file_name(tree_file)
 
@@ -15,17 +19,20 @@ def treeshrink(tree_file, output_dir, quantiles, output_ext):
         '--centroid',
         '--mode per-gene',
         '--quantiles {}'.format(quantiles),
-        '--outdir {}'.format(basename(subdir)),
-        '--tempdir {}'.format(basename(subdir))])
+        '--outdir {}'.format(subdir),
+        '--tempdir {}'.format(subdir)])
 
     with util.cd(output_dir):
         subprocess.check_call(cmd, shell=True)
 
-    tree_src = join(subdir, tree_file)
-    tree_dst = util.file_name(tree_file, output_ext)
+        mask = util.file_name(subdir + '_*', ext=EXT_IN, dir_=subdir)
+        tree_src = glob(mask)[0]
+        tree_dst = util.file_name(tree_file, output_ext + EXT_OUT)
 
-    with open(tree_src) as in_file, open(tree_dst, 'w') as out_file:
-        content = in_file.read()
-        out_file.write(content.replace("'", ''))
+        with open(tree_src) as in_file, open(tree_dst, 'w') as out_file:
+            content = in_file.read()
+            out_file.write(content.replace("'", ''))
+
+        rmtree(subdir)
 
     return tree_dst
