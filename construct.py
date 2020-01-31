@@ -5,8 +5,9 @@
 import re
 import sys
 import os
+from os.path import abspath, expanduser, isfile
 import logging
-from os.path import abspath, expanduser
+from glob import glob
 import argparse
 from pylib import util
 from pylib import bio
@@ -20,6 +21,7 @@ from pylib.steps.orth2fa import orthologs_to_fasta
 
 
 STEP = 0
+INPUT_ATTRS = set()
 
 
 def construct():
@@ -68,7 +70,36 @@ def parse_args():
     prune_step(subparsers)
     orth2fa_step(subparsers)
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    expand_files(args)
+
+    return args
+
+
+def expand_files(args):
+    """Handle unexpanded globs."""
+    global INPUT_ATTRS
+
+    for attr in INPUT_ATTRS:
+        if not hasattr(args, attr):
+            continue
+        arg_files = []
+        try:
+            for name in getattr(args, attr):
+                if isfile(name):
+                    arg_files += name
+                elif any(name.find(x) > -1 for x in ('*', '?', '[')):
+                    files = glob(name)
+                    if not files:
+                        raise ValueError(name)
+                    arg_files += files
+                else:
+                    raise ValueError(name)
+        except ValueError as err:
+            logging.critical('"{}" Did not match files'.format(err.args[0]))
+            sys.exit(1)
+        setattr(args, attr, arg_files)
 
 
 def check_step(subparsers):
@@ -78,8 +109,7 @@ def check_step(subparsers):
             fasta files. Are there too few fasta records in the file to make
             a tree? Or are there really long sequences that may crash the
             alignment process?"""))
-    input_dir(check_parser)
-    input_filter(check_parser, '*.fasta')
+    input_files(check_parser, './*.fasta')
     seq_type_arg(check_parser)
     check_parser.set_defaults(func=check)
 
@@ -138,9 +168,8 @@ def mask_step(subparsers):
     mask_parser = subparsers.add_parser(
         'mask', help=helper("""Mask both mono- and (optional) paraphyletic
             tips that belong to the same taxon."""))
-    input_dir(mask_parser)
-    input_filter(mask_parser, '*.cln', long='--clean-filter', short='-c')
-    input_filter(mask_parser, '*.ts', long='--tree-filter', short='-t')
+    input_files(mask_parser, './*.cln', long='--cleaned-files', short='-c')
+    input_files(mask_parser, './*.ts', long='--tree-files', short='-t')
     mask_parser.add_argument(
         '--mask-paraphyletic', action='store_true',
         help="""When masking tree tips, do you want to also mask paraphyletic
@@ -152,6 +181,8 @@ def tree2fa_step(subparsers):
     """Add tree2fa step."""
     tree2fa_parser = subparsers.add_parser(
         'tree2fa', help=helper(""""""))
+    input_files(tree2fa_parser, './*.t', long='--tree-files', short='-t')
+    input_files(tree2fa_parser, './*.m', long='--mask-files', short='-m')
     tree2fa_parser.set_defaults(func=tree2fa)
 
 
@@ -178,26 +209,23 @@ def helper(msg):
 
 def io_args(parser, default_filter, default_ext):
     """Add input and output file args to the parser."""
-    input_dir(parser)
-    input_filter(parser, default_filter)
+    input_files(parser, default_filter)
     output_args(parser, default_ext)
 
 
-def input_dir(parser):
-    """Add input directory arg."""
-    parser.add_argument(
-        '-i', '--input-dir', metavar='PATH', required=True,
-        help="""The directory containing the input files.""")
-
-
-def input_filter(parser, default_filter, long='--input-filter', short='-f'):
+def input_files(parser, default_filter, long='--input-files', short='-i'):
     """Add input filter arg."""
+    global INPUT_ATTRS
+    arg_name = long[2:].replace('-', '_')
+    INPUT_ATTRS.add(arg_name)
+
     parser.add_argument(
-        short, long, default=default_filter, metavar='FILTER',
-        help="""Use this to filter files in the input directory. For
-            example '*filtered*{0}' will select all "{0}" files in the
-            input directory with the word "filtered" in them. The default
-            is '{0}'.""".format(default_filter))
+        short, long, default=default_filter, metavar='FILTER', nargs='+',
+        required=True,
+        help="""Use this to filter files in an input directory. For example
+            'my_project/*filtered*{0}' will select all "{0}" files in the 
+            local directory "my_project" with the word "filtered" in them.
+            The default is '{0}'.""".format(default_filter))
 
 
 def output_args(parser, default_ext):

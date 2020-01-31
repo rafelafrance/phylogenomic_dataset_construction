@@ -2,14 +2,13 @@
 
 from os.path import abspath
 import logging
-import pylib.util as util
 from pylib.wrappers.phyx import pxrr
 from pylib.wrappers.treeshrink import treeshrink
 
 
 def shrink(args):
     """Remove long branches from trees."""
-    for tree in util.get_input_files(args.input_dir, args.input_filter):
+    for tree in args.input_files:
         logging.info('shrink input: {}'.format(tree))
 
         tree = abspath(tree)

@@ -1,14 +1,13 @@
 """Build homology trees."""
 
 import logging
-import pylib.util as util
 from pylib.wrappers.mask_tips import mask_tips
 
 
 def mask(args):
     """Mask mono- and paraphyletic-tips that belong to the same taxon."""
-    trees = util.get_input_files(args.input_dir, args.tree_filter)
-    cleaned = util.get_input_files(args.input_dir, args.clean_filter)
+    trees = args.cleaned_files
+    cleaned = args.tree_files
 
     for fasta, tree in zip(cleaned, trees):
         logging.info('mask input: {}'.format(fasta))

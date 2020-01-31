@@ -7,7 +7,7 @@ import pylib.bio as bio
 
 def check(args):
     """Check the input files for good data."""
-    for fasta in util.get_input_files(args.input_dir, args.input_filter):
+    for fasta in args.input_files:
         logging.info('check input: {}'.format(fasta))
         duplicate_names(fasta)
         too_few_records(fasta)

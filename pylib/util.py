@@ -1,9 +1,7 @@
 """Misc. utilities and constants."""
 
-import sys
 import os
 from os.path import basename, expanduser, join, splitext
-import logging
 from glob import glob
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -64,14 +62,3 @@ def file_name(base_name, ext=None, dir_=None):
     if ext:
         path += ext
     return path
-
-
-def get_input_files(input_dir, input_filter):
-    """Get a list of the input files."""
-    pattern = join(input_dir, input_filter)
-    in_files = sorted([p for p in glob(pattern)])
-    if len(in_files) == 0:
-        logging.critical(
-            'No files were found with this mask: "{}".'.format(pattern))
-        sys.exit(1)
-    return in_files

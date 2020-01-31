@@ -19,7 +19,7 @@ import pylib.bio as bio
 
 def check_input(args):
     """Check the input files for good data."""
-    for in_file in util.get_input_files(args.input_dir, args.input_filter):
+    for in_file in args.input_files:
         logging.info('Checking fasta "{}"'.format(in_file))
         too_few_records(in_file)
         seq_too_long(in_file, args.seq_type)

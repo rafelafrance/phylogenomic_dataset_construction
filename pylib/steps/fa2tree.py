@@ -2,7 +2,6 @@
 
 from os.path import abspath
 import logging
-import pylib.util as util
 import pylib.bio as bio
 from pylib.wrappers.mafft import mafft
 from pylib.wrappers.raxml import raxml, raxml_bs
@@ -13,7 +12,7 @@ from pylib.wrappers.fasttree import fasttree
 
 def fa2tree(args):
     """Build trees from the fasta data."""
-    for fasta in util.get_input_files(args.input_dir, args.input_filter):
+    for fasta in args.input_files:
         logging.info('fa2tree input: {}'.format(fasta))
         fasta = abspath(fasta)
         if args.bootstrap:
