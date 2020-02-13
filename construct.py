@@ -84,6 +84,11 @@ def expand_files(args):
     for attr in INPUT_ATTRS:
         if not hasattr(args, attr):
             continue
+
+        names = getattr(args, attr)
+        names = names if isinstance(names, list) else [names]
+        setattr(args, attr, names)
+
         arg_files = []
         try:
             for name in getattr(args, attr):
@@ -97,7 +102,7 @@ def expand_files(args):
                 else:
                     raise ValueError(name)
         except ValueError as err:
-            logging.critical('"{}" Did not match files'.format(err.args[0]))
+            logging.critical('"{}" Did not match files'.format(err))
             sys.exit(1)
         setattr(args, attr, arg_files)
 
@@ -168,8 +173,8 @@ def mask_step(subparsers):
     mask_parser = subparsers.add_parser(
         'mask', help=helper("""Mask both mono- and (optional) paraphyletic
             tips that belong to the same taxon."""))
-    input_files(mask_parser, './*.cln', long='--cleaned-files', short='-c')
-    input_files(mask_parser, './*.ts', long='--tree-files', short='-t')
+    input_files(mask_parser, '*.cln', long='--cleaned-files', short='-c')
+    input_files(mask_parser, '*.ts', long='--tree-files', short='-t')
     mask_parser.add_argument(
         '--mask-paraphyletic', action='store_true',
         help="""When masking tree tips, do you want to also mask paraphyletic
@@ -181,8 +186,8 @@ def tree2fa_step(subparsers):
     """Add tree2fa step."""
     tree2fa_parser = subparsers.add_parser(
         'tree2fa', help=helper(""""""))
-    input_files(tree2fa_parser, './*.t', long='--tree-files', short='-t')
-    input_files(tree2fa_parser, './*.m', long='--mask-files', short='-m')
+    input_files(tree2fa_parser, '*.t', long='--tree-files', short='-t')
+    input_files(tree2fa_parser, '*.m', long='--mask-files', short='-m')
     tree2fa_parser.set_defaults(func=tree2fa)
 
 
@@ -207,28 +212,27 @@ def helper(msg):
     return 'STEP {}: {}'.format(STEP, msg)
 
 
-def io_args(parser, default_filter, default_ext):
+def io_args(parser, input_filter, output_ext):
     """Add input and output file args to the parser."""
-    input_files(parser, default_filter)
-    output_args(parser, default_ext)
+    input_files(parser, input_filter)
+    output_args(parser, output_ext)
 
 
-def input_files(parser, default_filter, long='--input-files', short='-i'):
+def input_files(parser, input_filter, long='--input-files', short='-i'):
     """Add input filter arg."""
     global INPUT_ATTRS
     arg_name = long[2:].replace('-', '_')
     INPUT_ATTRS.add(arg_name)
 
     parser.add_argument(
-        short, long, default=default_filter, metavar='FILTER', nargs='+',
-        required=True,
+        short, long, default=input_filter, metavar='FILTER', nargs='+',
         help="""Use this to filter files in an input directory. For example
             'my_project/*filtered*{0}' will select all "{0}" files in the 
             local directory "my_project" with the word "filtered" in them.
-            The default is '{0}'.""".format(default_filter))
+            The default is '{0}'.""".format(input_filter))
 
 
-def output_args(parser, default_ext):
+def output_args(parser, output_ext):
     """Add output file args to the parser."""
     parser.add_argument(
         '-o', '--output-dir', metavar='PATH', default='.',
@@ -236,9 +240,9 @@ def output_args(parser, default_ext):
             current directory.""")
 
     parser.add_argument(
-        '-e', '--output-ext', metavar='EXT', default=default_ext,
+        '-e', '--output-ext', metavar='EXT', default=output_ext,
         help="""The file extention to use for the output files. 
-            The default is '{}'.""".format(default_ext))
+            The default is '{}'.""".format(output_ext))
 
 
 def seq_type_arg(parser):
