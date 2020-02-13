@@ -3,8 +3,6 @@
 import re
 from itertools import groupby
 from Bio import Phylo
-from pylib.util import taxon_id
-from pylib import bio
 from pylib import util
 
 
@@ -34,7 +32,10 @@ def mask_monophyletic_tips(tree):
         parents = [n for n in tree.get_nonterminals() if n.is_preterminal()]
         for parent in parents:
             sibs = [s for s in tree.get_terminals() if parent.is_parent_of(s)]
-            sibs = sorted(sibs, key=lambda s: s.branch_length)
-            for node in sibs[1:]:
-                tree.prune(node)
-                again = True
+            sibs = sorted(sibs, key=lambda s: s.name)
+            for _, group in groupby(
+                    sibs, key=lambda s: util.taxon_id(s.name)):
+                group = sorted(group, key=lambda s: s.branch_length)
+                for node in group[1:]:
+                    tree.prune(node)
+                    again = True
