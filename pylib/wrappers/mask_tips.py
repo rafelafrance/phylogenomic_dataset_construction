@@ -28,6 +28,8 @@ def mask_tips(fasta_file, tree_file, output_dir, output_extension,
     with util.cd(output_dir):
         Phylo.write(tree, output, 'newick')
 
+    return output
+
 
 def mask_monophyletic_tips(tree, char_count):
     """Mask monophyletic tips."""

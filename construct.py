@@ -175,6 +175,7 @@ def mask_step(subparsers):
             tips that belong to the same taxon."""))
     input_files(mask_parser, '*.cln', long='--cleaned-files', short='-c')
     input_files(mask_parser, '*.ts', long='--tree-files', short='-t')
+    output_args(mask_parser, '.mm')
     mask_parser.add_argument(
         '--mask-paraphyletic', action='store_true',
         help="""When masking tree tips, do you want to also mask paraphyletic
@@ -232,17 +233,18 @@ def input_files(parser, input_filter, long='--input-files', short='-i'):
             The default is '{0}'.""".format(input_filter))
 
 
-def output_args(parser, output_ext):
+def output_args(parser, output_ext=None):
     """Add output file args to the parser."""
     parser.add_argument(
         '-o', '--output-dir', metavar='PATH', default='.',
         help="""Place output files in this directory. The default is the
             current directory.""")
 
-    parser.add_argument(
-        '-e', '--output-ext', metavar='EXT', default=output_ext,
-        help="""The file extention to use for the output files. 
-            The default is '{}'.""".format(output_ext))
+    if output_ext:
+        parser.add_argument(
+            '-e', '--output-ext', metavar='EXT', default=output_ext,
+            help="""The file extention to use for the output files. 
+                The default is '{}'.""".format(output_ext))
 
 
 def seq_type_arg(parser):
