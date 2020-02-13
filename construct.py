@@ -88,7 +88,7 @@ def expand_files(args):
         try:
             for name in getattr(args, attr):
                 if isfile(name):
-                    arg_files += name
+                    arg_files += [name]
                 elif any(name.find(x) > -1 for x in ('*', '?', '[')):
                     files = glob(name)
                     if not files:
