@@ -171,15 +171,8 @@ def shrink_step(subparsers):
 def mask_step(subparsers):
     """Add mask step."""
     mask_parser = subparsers.add_parser(
-        'mask', help=helper("""Mask both mono- and (optional) paraphyletic
-            tips that belong to the same taxon."""))
-    input_files(mask_parser, '*.cln', long='--cleaned-files', short='-c')
-    input_files(mask_parser, '*.ts', long='--tree-files', short='-t')
-    output_args(mask_parser, '.mm')
-    mask_parser.add_argument(
-        '--mask-paraphyletic', action='store_true',
-        help="""When masking tree tips, do you want to also mask paraphyletic
-            tips.""")
+        'mask', help=helper("""Mask both monophyletic tree tips."""))
+    io_args(mask_parser, '*.tt', '.mm')
     mask_parser.set_defaults(func=mask)
 
 
@@ -228,9 +221,10 @@ def input_files(parser, input_filter, long='--input-files', short='-i'):
     parser.add_argument(
         short, long, default=input_filter, metavar='FILTER', nargs='+',
         help="""Use this to filter files in an input directory. For example
-            'my_project/*filtered*{0}' will select all "{0}" files in the 
-            local directory "my_project" with the word "filtered" in them.
-            The default is '{0}'.""".format(input_filter))
+            'my_project/*filtered{1}' will select all files ending with "{1}"
+            in the local directory "my_project" and with the word "filtered"
+            in them. The default is "{0}".""".format(
+                input_filter, input_filter[1:]))
 
 
 def output_args(parser, output_ext=None):
@@ -244,7 +238,7 @@ def output_args(parser, output_ext=None):
         parser.add_argument(
             '-e', '--output-ext', metavar='EXT', default=output_ext,
             help="""The file extention to use for the output files. 
-                The default is '{}'.""".format(output_ext))
+                The default is "{}".""".format(output_ext))
 
 
 def seq_type_arg(parser):
