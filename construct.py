@@ -15,6 +15,7 @@ from pylib.steps.check import check
 from pylib.steps.fa2tree import fa2tree
 from pylib.steps.shrink import shrink
 from pylib.steps.mask import mask
+from pylib.steps.cut import cut
 from pylib.steps.tree2fa import tree2fa
 from pylib.steps.prune import prune_paralogs
 from pylib.steps.orth2fa import orthologs_to_fasta
@@ -66,6 +67,7 @@ def parse_args():
     fasta2tree_step(subparsers)
     shrink_step(subparsers)
     mask_step(subparsers)
+    cut_step(subparsers)
     tree2fa_step(subparsers)
     prune_step(subparsers)
     orth2fa_step(subparsers)
@@ -174,6 +176,23 @@ def mask_step(subparsers):
         'mask', help=helper("""Mask both monophyletic tree tips."""))
     io_args(mask_parser, '*.tt', '.mm')
     mask_parser.set_defaults(func=mask)
+
+
+def cut_step(subparsers):
+    """Add mask step."""
+    cut_parser = subparsers.add_parser(
+        'cut', help=helper("""Cut long internal branches
+            (or deep paralogs)."""))
+    io_args(cut_parser, '*.mm', '.subtree')
+    cut_parser.add_argument(
+        '--branch-cutoff', type=float, required=True,
+        help="""Internal branch length cutoff. Cut branches longer than this
+            value.""")
+    cut_parser.add_argument(
+        '--min-taxa', type=int, required=True,
+        help="""Minimum number of taxa. Make sure that trees have at least
+            this number of taxa.""")
+    cut_parser.set_defaults(func=cut)
 
 
 def tree2fa_step(subparsers):
