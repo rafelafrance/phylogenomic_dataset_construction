@@ -181,8 +181,7 @@ def mask_step(subparsers):
 def cut_step(subparsers):
     """Add mask step."""
     cut_parser = subparsers.add_parser(
-        'cut', help=helper("""Cut long internal branches
-            (or deep paralogs)."""))
+        'cut', help=helper("""Cut long internal branches (deep paralogs)."""))
     io_args(cut_parser, '*.mm', '.subtree')
     cut_parser.add_argument(
         '--branch-cutoff', type=float, required=True,
@@ -294,22 +293,6 @@ def other_args(parser):
                      not have duplicated taxa.""")
 
     parser.add_argument(
-        '--min-taxa', type=int, default=2,
-        help="""""")
-
-    parser.add_argument(
-        '--min-bootstrap', type=float, default=0.0,
-        help="""""")
-
-    parser.add_argument(
-        '--absolute-tip-cutoff', type=float, default=0.02,
-        help="""""")
-
-    parser.add_argument(
-        '--relative-tip-cutoff', type=float, default=0.02,
-        help="""""")
-
-    parser.add_argument(
         '--out-groups',
         help="""This is a comma separated list of out-groups used while
             pruning trees. You may need to quote this argument.""")
@@ -317,16 +300,6 @@ def other_args(parser):
     parser.add_argument(
         '--taxon-code-file', metavar='CODE-FILE',
         help="""Path to the taxon code file.""")
-
-    parser.add_argument(
-        '--temp-dir', metavar='DIR',
-        help="""Place temporary files in this directory. All files will be
-            deleted after aTRAM completes. The directory must exist.""")
-
-    parser.add_argument(
-        '--keep-temp-dir', action='store_true',
-        help="""This flag will keep the temporary files in the --temp-dir
-            around for debugging.""")
 
     args = parser.parse_args()
 

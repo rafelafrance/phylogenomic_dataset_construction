@@ -62,3 +62,9 @@ def file_name(base_name, ext=None, dir_=None):
     if ext:
         path += ext
     return path
+
+
+def count_tree_taxa(tree):
+    """Count the number of taxa in the tree."""
+    taxa = [taxon_id(n.name) for n in tree.get_terminals()]
+    return len(set(taxa))
