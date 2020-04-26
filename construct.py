@@ -87,22 +87,13 @@ def expand_files(args):
         if not hasattr(args, attr):
             continue
 
-        names = getattr(args, attr)
-        names = names if isinstance(names, list) else [names]
-        setattr(args, attr, names)
-
         arg_files = []
         try:
             for name in getattr(args, attr):
-                if isfile(name):
-                    arg_files += [name]
-                elif any(name.find(x) > -1 for x in ('*', '?', '[')):
-                    files = glob(name)
-                    if not files:
-                        raise ValueError(name)
-                    arg_files += files
-                else:
+                files = glob(name)
+                if not files:
                     raise ValueError(name)
+                arg_files += files
         except ValueError as err:
             logging.critical('"{}" Did not match files'.format(err))
             sys.exit(1)
@@ -237,7 +228,7 @@ def input_files(parser, input_filter, long='--input-files', short='-i'):
     INPUT_ATTRS.add(arg_name)
 
     parser.add_argument(
-        short, long, default=input_filter, metavar='FILTER', nargs='+',
+        short, long, default=input_filter, metavar='FILTER', action='append',
         help="""Use this to filter files in an input directory. For example
             'my_project/*filtered{1}' will select all files ending with "{1}"
             in the local directory "my_project" and with the word "filtered"
